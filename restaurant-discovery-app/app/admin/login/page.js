@@ -2,19 +2,21 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'admin123';
-
 export default function AdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      localStorage.setItem('isAdmin', 'true');
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+
+    if (res.ok) {
       router.push('/admin');
     } else {
       setError('Invalid credentials');

@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
+import { verifySessionToken } from '@/lib/auth';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -20,6 +21,11 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  const token = request.cookies.get('admin_session')?.value;
+  if (!verifySessionToken(token)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = await request.json();
 
   if (!body.name || !body.cuisine || !body.location) {

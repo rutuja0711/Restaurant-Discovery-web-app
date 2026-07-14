@@ -7,12 +7,11 @@ export function useAdminGuard() {
   const router = useRouter();
 
   useEffect(() => {
-    const isAdmin = localStorage.getItem('isAdmin');
-    if (isAdmin !== 'true') {
-      router.push('/admin/login');
-    } else {
-      setChecked(true);
-    }
+    fetch('/api/admin/check')
+      .then((res) => {
+        if (res.ok) setChecked(true);
+        else router.push('/admin/login');
+      });
   }, [router]);
 
   return checked;
