@@ -1,14 +1,16 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
+
 export async function GET(request, { params }) {
+  const { id } = await params;
   const restaurant = await prisma.restaurant.findUnique({
-    where: { id: Number(params.id) },
-    include: { images: true },
+    where: { id: number(id) },
+    include :{image:true},
   });
 
   if (!restaurant) {
-    return NextResponse.json({ error: 'Restaurant not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Restaurant not found' }, { status:404 });
   }
   return NextResponse.json(restaurant);
 }
