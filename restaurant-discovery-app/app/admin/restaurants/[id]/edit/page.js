@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useAdminGuard } from '@/lib/useAdminGuard';
 import RestaurantForm from '@/components/RestaurantForm';
+import Navbar from '@/components/Navbar';
 
 export default function EditRestaurant() {
   const checked = useAdminGuard();
@@ -17,9 +18,12 @@ export default function EditRestaurant() {
   if (!checked || !data) return null;
 
   return (
-    <main>
-      <h1>Edit Restaurant</h1>
-      <RestaurantForm initialData={data} restaurantId={id} />
-    </main>
+    <>
+      <Navbar />
+      <main className="admin-page">
+        <h1>Edit Restaurant</h1>
+        <RestaurantForm initialData={data} restaurantId={id} />
+      </main>
+    </>
   );
 }

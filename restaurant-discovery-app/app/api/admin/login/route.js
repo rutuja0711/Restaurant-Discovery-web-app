@@ -17,7 +17,7 @@ export async function POST(request) {
   response.cookies.set('admin_session', token, {
     httpOnly: true,
     sameSite: 'strict',
-    maxAge: 60 * 60 * 4, // 4 hours
+    maxAge: 60 * 60 * 4,
   });
   return response;
 }

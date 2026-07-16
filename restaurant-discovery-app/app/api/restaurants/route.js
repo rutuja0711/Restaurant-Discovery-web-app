@@ -12,8 +12,9 @@ export async function GET(request) {
     where: {
       name: search ? { contains: search, mode: 'insensitive' } : undefined,
       location: location || undefined,
-      cuisine: cuisine || undefined,
+      cuisine: cuisine ? { contains: cuisine, mode: 'insensitive' } : undefined,
     },
+    include: { images: true },
     orderBy: { createdAt: 'desc' },
   });
 
@@ -32,6 +33,17 @@ export async function POST(request) {
     return NextResponse.json({ error: 'name, cuisine and location are required' }, { status: 400 });
   }
 
-  const restaurant = await prisma.restaurant.create({ data: body });
+  const { imageUrls, menuItems, ...restaurantData } = body;
+
+  const restaurant = await prisma.restaurant.create({
+    data: {
+      ...restaurantData,
+      images: imageUrls?.length
+        ? { create: imageUrls.map((url, i) => ({ imageUrl: url, isPrimary: i === 0 })) }
+        : undefined,
+      menuItems: menuItems?.length ? { create: menuItems } : undefined,
+    },
+  });
+
   return NextResponse.json(restaurant, { status: 201 });
 }

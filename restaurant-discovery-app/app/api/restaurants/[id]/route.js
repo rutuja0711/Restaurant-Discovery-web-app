@@ -5,8 +5,8 @@ import { NextResponse } from 'next/server';
 export async function GET(request, { params }) {
   const { id } = await params;
   const restaurant = await prisma.restaurant.findUnique({
-    where: { id: number(id) },
-    include :{image:true},
+    where: { id: Number(id) },
+    include :{images:true},
   });
 
   if (!restaurant) {
@@ -33,3 +33,4 @@ export async function DELETE(request, { params }) {
   await prisma.restaurant.delete({ where: { id: Number(params.id) } });
   return NextResponse.json({ success: true });
 }
+

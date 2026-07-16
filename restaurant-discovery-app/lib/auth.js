@@ -2,19 +2,42 @@ import crypto from 'crypto';
 
 const SECRET = process.env.ADMIN_SESSION_SECRET;
 
-export function createSessionToken() {
-  const payload = `admin:${Date.now()}`;
-  const signature = crypto.createHmac('sha256', SECRET).update(payload).digest('hex');
+function sign(payload) {
+  return crypto.createHmac('sha256', SECRET).update(payload).digest('hex');
+}
+
+function createToken(prefix, id) {
+  const payload = `${prefix}:${id}:${Date.now()}`;
+  const signature = sign(payload);
   return `${Buffer.from(payload).toString('base64')}.${signature}`;
 }
 
-export function verifySessionToken(token) {
-  if (!token) return false;
+function verifyToken(token, prefix) {
+  if (!token) return null;
   const [encodedPayload, signature] = token.split('.');
-  if (!encodedPayload || !signature) return false;
+  if (!encodedPayload || !signature) return null;
 
   const payload = Buffer.from(encodedPayload, 'base64').toString();
-  const expectedSignature = crypto.createHmac('sha256', SECRET).update(payload).digest('hex');
+  if (sign(payload) !== signature) return null;
 
-  return signature === expectedSignature;
+  const [tokenPrefix, id] = payload.split(':');
+  if (tokenPrefix !== prefix) return null;
+
+  return Number(id);
+}
+
+// Admin session 
+export function createSessionToken() {
+  return createToken('admin', 'admin');
+}
+export function verifySessionToken(token) {
+  return verifyToken(token, 'admin') !== null;
+}
+
+// User session 
+export function createUserToken(userId) {
+  return createToken('user', userId);
+}
+export function verifyUserToken(token) {
+  return verifyToken(token, 'user'); 
 }

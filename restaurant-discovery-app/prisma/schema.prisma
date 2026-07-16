@@ -12,7 +12,10 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}model Restaurant {
+}
+
+
+model Restaurant {
   id            Int      @id @default(autoincrement())
   name          String
   cuisine       String
@@ -24,7 +27,9 @@ datasource db {
   openingHours  String?
   contactNumber String?
   createdAt     DateTime @default(now())
-  images        RestaurantImage[]
+  images     RestaurantImage[]
+  menuItems     MenuItem[]
+  reviews       Review[]
 }
 
 model RestaurantImage {
@@ -33,4 +38,29 @@ model RestaurantImage {
   isPrimary    Boolean    @default(false)
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantId Int
+}
+
+model MenuItem {
+  id           Int        @id @default(autoincrement())
+  name         String
+  price        String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId Int
+}
+
+model Review {
+  id           Int        @id @default(autoincrement())
+  reviewerName String
+  rating       Int
+  comment      String
+  createdAt    DateTime   @default(now())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId Int
+}
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
 }
