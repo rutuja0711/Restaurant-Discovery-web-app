@@ -85,8 +85,8 @@ export default function RestaurantDetails() {
 
         <div className="action-row">
           <a className="action-btn" target="_blank" rel="noreferrer" href={`https://www.google.com/maps?q=${mapQuery}`}>Directions</a>
-          <button className="action-btn" onClick={() => setActiveTab('reviews')}>Reviews</button>
-          <button className="action-btn primary" onClick={() => setActiveTab('booking')}>Book a table</button>
+          {/* <button className="action-btn" onClick={() => setActiveTab('reviews')}>Reviews</button>
+          <button className="action-btn primary" onClick={() => setActiveTab('booking')}>Book a table</button> */}
         </div>
 
         <div className="gallery">
