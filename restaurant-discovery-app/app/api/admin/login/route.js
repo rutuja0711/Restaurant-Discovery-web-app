@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { createSessionToken } from '@/lib/auth';
 
 export async function POST(request) {
-  const { username, password } = await request.json();
+  const { username , password } = await request.json();
 
   const validUsername = username === process.env.ADMIN_USERNAME;
   const validPassword = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);

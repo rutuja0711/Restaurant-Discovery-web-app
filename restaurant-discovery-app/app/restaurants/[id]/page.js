@@ -10,7 +10,7 @@ export default function RestaurantDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
-  const [reviewForm, setReviewForm] = useState({ reviewerName: '', rating: '', comment: '' });
+  const [reviewForm, setReviewForm] = useState({ reviewerName: '', rating: 0, comment: '' });
   const [reviewError, setReviewError] = useState('');
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
 
@@ -31,7 +31,7 @@ export default function RestaurantDetails() {
     e.preventDefault();
     setReviewError('');
     if (!reviewForm.reviewerName.trim() || !reviewForm.comment.trim() || !reviewForm.rating) {
-      setReviewError('Please fill in your name, a rating, and a comment.');
+      setReviewError('Please add your name, a star rating, and a comment.');
       return;
     }
     setReviewSubmitting(true);
@@ -42,7 +42,7 @@ export default function RestaurantDetails() {
     });
     setReviewSubmitting(false);
     if (res.ok) {
-      setReviewForm({ reviewerName: '', rating: '', comment: '' });
+      setReviewForm({ reviewerName: '', rating: 0, comment: '' });
       loadRestaurant();
     } else {
       const data = await res.json();
@@ -58,6 +58,9 @@ export default function RestaurantDetails() {
     : ['https://picsum.photos/id/292/900/600', 'https://picsum.photos/id/312/450/295', 'https://picsum.photos/id/365/450/295'];
 
   const mapQuery = encodeURIComponent(`${restaurant.address}, ${restaurant.location}`);
+  const mapSrc = restaurant.latitude && restaurant.longitude
+    ? `https://www.google.com/maps?q=${restaurant.latitude},${restaurant.longitude}&output=embed`
+    : `https://www.google.com/maps?q=${mapQuery}&output=embed`;
   const cuisines = restaurant.cuisine.split(',').map((c) => c.trim());
 
   return (
@@ -132,7 +135,7 @@ export default function RestaurantDetails() {
             </div>
             <h2 style={{ marginTop: '32px' }}>Location</h2>
             <div className="map-embed">
-              <iframe title="restaurant-location" width="100%" height="320" style={{ border: 0, borderRadius: '16px' }} loading="lazy" src={`https://www.google.com/maps?q=${mapQuery}&output=embed`} />
+              <iframe title="restaurant-location" width="100%" height="320" style={{ border: 0, borderRadius: '16px' }} loading="lazy" src={mapSrc} />
             </div>
           </div>
         )}
@@ -177,19 +180,25 @@ export default function RestaurantDetails() {
                 value={reviewForm.reviewerName}
                 onChange={(e) => setReviewForm((p) => ({ ...p, reviewerName: e.target.value }))}
               />
-              <select
-                value={reviewForm.rating}
-                onChange={(e) => setReviewForm((p) => ({ ...p, rating: e.target.value }))}
-              >
-                <option value="">Rating</option>
-                {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n} star{n > 1 ? 's' : ''}</option>)}
-              </select>
+              <div className="star-picker">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className={`star-btn ${n <= reviewForm.rating ? 'filled' : ''}`}
+                    onClick={() => setReviewForm((p) => ({ ...p, rating: n }))}
+                    aria-label={`${n} star${n > 1 ? 's' : ''}`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
               <textarea
                 placeholder="Share your experience..."
                 value={reviewForm.comment}
                 onChange={(e) => setReviewForm((p) => ({ ...p, comment: e.target.value }))}
               />
-              {reviewError && <p style={{ color: 'red' }}>{reviewError}</p>}
+              {reviewError && <p className="field-error">{reviewError}</p>}
               <button type="submit" disabled={reviewSubmitting}>{reviewSubmitting ? 'Posting...' : 'Post review'}</button>
             </form>
 

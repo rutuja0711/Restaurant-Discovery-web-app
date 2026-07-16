@@ -112,6 +112,7 @@ export default function RestaurantDetails() {
               </div>
             )}
           </div>
+          
 
           <aside className="details-sidebar">
             <h3>Restaurant info</h3>

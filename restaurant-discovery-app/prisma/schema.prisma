@@ -25,6 +25,8 @@ model Restaurant {
   menuItems     MenuItem[]
   images        RestaurantImage[]
   reviews       Review[]
+  ownerId       Int?
+  owner         admin?  @relation(fields: [ownerId], references: [id], onDelete: SetNull)
 }
 
 model RestaurantImage {
@@ -60,3 +62,14 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
 }
+
+
+model admin {
+  id           Int          @id @default(autoincrement())
+  name         String
+  email        String       @unique
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  restaurants  Restaurant[]
+}
+
