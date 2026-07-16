@@ -170,6 +170,11 @@ export default function RestaurantForm({ initialData, restaurantId }) {
             <input placeholder="Contact number" value={form.contactNumber} onChange={(e) => update('contactNumber', e.target.value)} />
           </>
         )}
+        <div style={{ display: 'flex', gap: '10px' }}>
+  <input placeholder="Latitude (e.g. 20.0059)" value={form.latitude} onChange={(e) => update('latitude', e.target.value)} />
+  <input placeholder="Longitude (e.g. 73.7910)" value={form.longitude} onChange={(e) => update('longitude', e.target.value)} />
+</div>
+<p className="wizard-hint">Tip: right-click the spot on Google Maps, the coordinates copy to your clipboard.</p>
 
         {stepIndex === 1 && (
           <>
