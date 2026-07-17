@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { verifyUserToken } from '@/lib/auth';
 
 export async function GET(request) {
-  const token = request.cookies.get('user-session')?.value;
+  const token = request.cookies.get('user_session')?.value;
 
   const userId = verifyUserToken(token);
 

@@ -30,8 +30,7 @@ export default function AdminDashboard() {
     <>
       <Navbar />
       <main className="admin-page">
-        <h1>My Restaurants</h1>
-        <Link href="/admin/restaurants/new" className="action-btn primary">+ Add restaurant</Link>
+        <h1>Manage My Restaurant</h1>
 
         {restaurants.length === 0 && <p className="state-msg">You haven't added any restaurants yet.</p>}
 
@@ -51,6 +50,7 @@ export default function AdminDashboard() {
             </tbody>
           </table>
         )}
+        <Link href="/admin/restaurants/new" className="action-btn primary">+ Add restaurant</Link>
 
         <ConfirmationModal
           open={showModal}

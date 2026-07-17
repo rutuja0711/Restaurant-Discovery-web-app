@@ -7,16 +7,24 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState(null);
-  const isAdminArea = pathname?.startsWith('/superadmin') && pathname !== '/superadmin/login';
+
+  const isSuperadminArea = pathname?.startsWith('/superadmin') && pathname !== '/superadmin/login';
+  const isAdminArea = pathname?.startsWith('/admin') && pathname !== '/admin/login' && pathname !== '/admin/register';
+  const isPrivilegedArea = isSuperadminArea || isAdminArea;
 
   useEffect(() => {
-    if (isAdminArea) return;
+    if (isPrivilegedArea) return;
     fetch('/api/auth/me').then((res) => res.json()).then((data) => setUser(data.user));
-  }, [pathname, isAdminArea]);
+  }, [pathname, isPrivilegedArea]);
 
-  async function handleAdminLogout() {
+  async function handleSuperadminLogout() {
     await fetch('/api/superadmin/logout', { method: 'POST' });
     router.push('/superadmin/login');
+  }
+
+  async function handleAdminLogout() {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    router.push('/admin/login');
   }
 
   async function handleUserLogout() {
@@ -32,7 +40,9 @@ export default function Navbar() {
         <Link href="/">Home</Link>
         <Link href="/#explore">Explore Cuisines</Link>
 
-        {isAdminArea ? (
+        {isSuperadminArea ? (
+          <button className="navbar-logout" onClick={handleSuperadminLogout}>Log out</button>
+        ) : isAdminArea ? (
           <button className="navbar-logout" onClick={handleAdminLogout}>Log out</button>
         ) : user ? (
           <>
@@ -43,7 +53,7 @@ export default function Navbar() {
           <>
             <Link href="/login">Log in</Link>
             <Link href="/register">Sign up</Link>
-            <Link href="/admin/login"></Link>
+            {/* <Link href="/admin/login">Admin</Link> */}
           </>
         )}
       </div>

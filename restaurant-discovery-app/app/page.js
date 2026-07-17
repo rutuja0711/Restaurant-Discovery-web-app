@@ -5,6 +5,8 @@ import Navbar from "@/components/Navbar";
 import HeroSlider from "@/components/HeroSlider";
 import CuisineExplore from "@/components/CuisineExplore";
 import Footer from "@/components/Footer";
+import NearMeButton from "@/components/NearMeButton";
+import { getDistanceKm } from "@/lib/distance";
 
 export default function Home() {
   const [restaurants, setRestaurants] = useState([]);
@@ -13,6 +15,8 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [cuisine, setCuisine] = useState("");
+  const [userCoords, setUserCoords] = useState(null);
+  const [radiusKm, setRadiusKm] = useState(5);
 
   useEffect(() => {
     setLoading(true);
@@ -20,7 +24,6 @@ export default function Home() {
     if (search) params.set("search", search);
     if (location) params.set("location", location);
     if (cuisine) params.set("cuisine", cuisine);
-
     fetch(`/api/restaurants?${params.toString()}`)
       .then((res) => res.json())
       .then((data) => setRestaurants(data))
@@ -28,17 +31,44 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, [search, location, cuisine]);
 
+  let displayedRestaurants = restaurants;
+
+  if (userCoords) {
+    displayedRestaurants = restaurants
+      .filter((r) => r.latitude && r.longitude)
+      .map((r) => ({
+        ...r,
+        distanceKm: getDistanceKm(userCoords.lat, userCoords.lng, r.latitude, r.longitude),
+      }))
+      .filter((r) => r.distanceKm <= radiusKm)
+      .sort((a, b) => a.distanceKm - b.distanceKm);
+  }
+
   return (
     <>
       <Navbar />
       <HeroSlider onSearch={setSearch} />
       <CuisineExplore onSelect={setCuisine} />
-
       <main id="listing">
-        <h2 className="section-title">
-          {cuisine ? `${cuisine} restaurants` : "All restaurants"}
-          
-        </h2>
+        <div className="listing-header">
+          <h2 className="section-title">
+            {userCoords ? "Restaurants near you" : cuisine ? `${cuisine} restaurants` : "All restaurants"}
+          </h2>
+          <NearMeButton onLocationFound={setUserCoords} />
+          {userCoords && (
+            <>
+              <select value={radiusKm} onChange={(e) => setRadiusKm(Number(e.target.value))} className="radius-select">
+                <option value={1}>Within 1 km</option>
+                <option value={3}>Within 3 km</option>
+                <option value={5}>Within 5 km</option>
+                <option value={10}>Within 10 km</option>
+                <option value={15}>Within 15 km</option>
+                <option value={25}>Within 25 km</option>
+              </select>
+              <button className="action-btn" onClick={() => setUserCoords(null)}>Clear nearby filter</button>
+            </>
+          )}
+        </div>
 
         <div className="filters">
           <input
@@ -47,10 +77,7 @@ export default function Home() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <select
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          >
+          <select value={location} onChange={(e) => setLocation(e.target.value)}>
             <option value="">All locations</option>
             <option value="Nashik">Nashik</option>
             <option value="Pune">Pune</option>
@@ -64,17 +91,7 @@ export default function Home() {
             <option value="South Indian">South Indian</option>
             <option value="American">American</option>
           </select>
-          <select value={cuisine} onChange={(e) => setCuisine(e.target.value)}>
-            <option value="">Pet Friendly</option>
-          </select>
-          <select value={cuisine} onChange={(e) => setCuisine(e.target.value)}>
-            <option value="">Outdoor Sitting  </option>
-          </select>
-               <select value={cuisine} onChange={(e) => setCuisine(e.target.value)}>
-            <option value="">Rating : 4.5 and above </option>
-          </select><select value={cuisine} onChange={(e) => setCuisine(e.target.value)}>
-            <option value="">Serves Alcohol </option>
-          </select>
+         
           {(search || location || cuisine) && (
             <button
               onClick={() => {
@@ -90,21 +107,22 @@ export default function Home() {
 
         {loading && <p>Loading restaurants...</p>}
         {error && <p>{error}</p>}
-        {!loading && !error && restaurants.length === 0 && (
-          <p>No restaurants found.</p>
+        {!loading && !error && displayedRestaurants.length === 0 && (
+          <p>{userCoords ? `No restaurants found within ${radiusKm}km of you.` : "No restaurants found."}</p>
         )}
-
-        {!loading && !error && restaurants.length > 0 && (
+        {!loading && !error && displayedRestaurants.length > 0 && (
           <div className="grid">
-            {restaurants.map((r) => (
+            {displayedRestaurants.map((r) => (
               <a key={r.id} href={`/restaurants/${r.id}`}>
                 <RestaurantCard restaurant={r} />
+                {r.distanceKm !== undefined && (
+                  <p className="distance-tag">{r.distanceKm.toFixed(1)} km away</p>
+                )}
               </a>
             ))}
           </div>
         )}
       </main>
-
       <Footer />
     </>
   );

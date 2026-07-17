@@ -26,7 +26,7 @@ export default function AdminLogin() {
       <Navbar />
       <main className="auth-page">
         <form onSubmit={handleSubmit} className="auth-form">
-          <h1>Admin Login</h1>
+          <h1>Admin Login (Restaurant Owner)</h1>
           <p className="wizard-hint">For restaurant owners managing their own listing.</p>
           <input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} />
           <input type="password" placeholder="Password" value={form.password} onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))} />
