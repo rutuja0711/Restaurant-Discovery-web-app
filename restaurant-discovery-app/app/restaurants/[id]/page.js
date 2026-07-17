@@ -61,6 +61,11 @@ export default function RestaurantDetails() {
   const mapSrc = restaurant.latitude && restaurant.longitude
     ? `https://www.google.com/maps?q=${restaurant.latitude},${restaurant.longitude}&output=embed`
     : `https://www.google.com/maps?q=${mapQuery}&output=embed`;
+
+    const directionsUrl = restaurant.latitude && restaurant.longitude
+    ? `https://www.google.com/maps?q=${restaurant.latitude},${restaurant.longitude}`
+    : `https://www.google.com/maps?q=${mapQuery}`;
+
   const cuisines = restaurant.cuisine.split(',').map((c) => c.trim());
 
   return (
@@ -87,7 +92,8 @@ export default function RestaurantDetails() {
         </div>
 
         <div className="action-row">
-          <a className="action-btn" target="_blank" rel="noreferrer" href={`https://www.google.com/maps?q=${mapQuery}`}>Directions</a>
+          {/* <a className="action-btn" target="_blank" rel="noreferrer" href={`https://www.google.com/maps?q=${mapQuery}`}>Directions</a> */}
+          <a className="action-btn" target="_blank" rel="noreferrer" href={directionsUrl}>Directions</a>
           {/* <button className="action-btn" onClick={() => setActiveTab('reviews')}>Reviews</button>
           <button className="action-btn primary" onClick={() => setActiveTab('booking')}>Book a table</button> */}
         </div>

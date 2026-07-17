@@ -1254,3 +1254,10 @@ table button {
 .star-btn.filled {
   color: var(--accent-gold, #c9a860);
 }
+
+.location-picker-map {
+  height: 280px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  z-index: 1;
+}

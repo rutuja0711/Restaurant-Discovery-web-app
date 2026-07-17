@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 export default function LocationPicker({ initialLat, initialLng, onChange }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+  const markerInstance = useRef(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -12,7 +13,6 @@ export default function LocationPicker({ initialLat, initialLng, onChange }) {
     async function initMap() {
       const L = (await import('leaflet')).default;
       await import('leaflet/dist/leaflet.css');
-
       if (cancelled || mapInstance.current) return;
 
       delete L.Icon.Default.prototype._getIconUrl;
@@ -25,7 +25,7 @@ export default function LocationPicker({ initialLat, initialLng, onChange }) {
       const startLat = initialLat || 19.9975;
       const startLng = initialLng || 73.7898;
 
-      const map = L.map(mapRef.current).setView([startLat, startLng], 13);
+      const map = L.map(mapRef.current).setView([startLat, startLng], 14);
       mapInstance.current = map;
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -33,6 +33,7 @@ export default function LocationPicker({ initialLat, initialLng, onChange }) {
       }).addTo(map);
 
       const marker = L.marker([startLat, startLng], { draggable: true }).addTo(map);
+      markerInstance.current = marker;
 
       marker.on('dragend', () => {
         const pos = marker.getLatLng();
@@ -48,7 +49,6 @@ export default function LocationPicker({ initialLat, initialLng, onChange }) {
     }
 
     initMap();
-
     return () => {
       cancelled = true;
       if (mapInstance.current) {
@@ -58,11 +58,19 @@ export default function LocationPicker({ initialLat, initialLng, onChange }) {
     };
   }, []);
 
+  // Re-center the map + marker whenever a new geocoded position comes in
+  useEffect(() => {
+    if (mapInstance.current && markerInstance.current && initialLat && initialLng) {
+      mapInstance.current.setView([initialLat, initialLng], 15);
+      markerInstance.current.setLatLng([initialLat, initialLng]);
+    }
+  }, [initialLat, initialLng]);
+
   return (
     <div>
       <div ref={mapRef} className="location-picker-map" />
       {!ready && <p className="wizard-hint">Loading map...</p>}
-      <p className="wizard-hint">Click or drag the pin to set the exact restaurant location.</p>
+      <p className="wizard-hint">We've placed a pin based on your address, drag it if it's not quite right.</p>
     </div>
   );
 }

@@ -7,7 +7,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState(null);
-  const isAdminArea = pathname?.startsWith('/admin') && pathname !== '/admin/login';
+  const isAdminArea = pathname?.startsWith('/superadmin') && pathname !== '/superadmin/login';
 
   useEffect(() => {
     if (isAdminArea) return;
@@ -15,8 +15,8 @@ export default function Navbar() {
   }, [pathname, isAdminArea]);
 
   async function handleAdminLogout() {
-    await fetch('/api/admin/logout', { method: 'POST' });
-    router.push('/admin/login');
+    await fetch('/api/superadmin/logout', { method: 'POST' });
+    router.push('/superadmin/login');
   }
 
   async function handleUserLogout() {

@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
-import { verifySessionToken } from '@/lib/auth';
+import { verifySuperadminToken } from '@/lib/auth';
 
 export async function GET(request, { params }) {
   const { id } = await params;
@@ -16,8 +16,8 @@ export async function GET(request, { params }) {
 }
 
 export async function PUT(request, { params }) {
-  const token = request.cookies.get('admin_session')?.value;
-  if (!verifySessionToken(token)) {
+  const token = request.cookies.get('superadmin_session')?.value;
+  if (!verifySuperadminToken(token)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -50,8 +50,8 @@ export async function PUT(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const token = request.cookies.get('admin_session')?.value;
-  if (!verifySessionToken(token)) {
+  const token = request.cookies.get('superadmin_session')?.value;
+  if (!verifySuperadminToken(token)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

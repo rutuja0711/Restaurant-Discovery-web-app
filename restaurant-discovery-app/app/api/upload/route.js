@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { verifySessionToken } from '@/lib/auth';
+import { verifySuperadminToken } from '@/lib/auth';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 
 export async function POST(request) {
-  const token = request.cookies.get('admin_session')?.value;
-  if (!verifySessionToken(token)) {
+  const token = request.cookies.get('superadmin_session')?.value;
+  if (!verifySuperadminToken(token)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

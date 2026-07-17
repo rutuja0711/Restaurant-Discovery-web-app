@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const SECRET = process.env.ADMIN_SESSION_SECRET;
+const SECRET = process.env.SUPERADMIN_SESSION_SECRET;
 
 function sign(payload) {
   return crypto.createHmac('sha256', SECRET).update(payload).digest('hex');
@@ -26,12 +26,12 @@ function verifyToken(token, prefix) {
   return Number(id);
 }
 
-// Admin session 
-export function createSessionToken() {
-  return createToken('admin', 'admin');
+// SuperAdmin session 
+export function createSuperadminToken() {
+  return createToken('superadmin', 'superadmin');
 }
-export function verifySessionToken(token) {
-  return verifyToken(token, 'admin') !== null;
+export function verifySuperadminToken(token) {
+  return verifyToken(token, 'superadmin') !== null;
 }
 
 // User session 
