@@ -41,3 +41,11 @@ export function createUserToken(userId) {
 export function verifyUserToken(token) {
   return verifyToken(token, 'user'); 
 }
+
+// admin (restaurant owner)
+export function createAdminToken(adminId) {
+  return createToken('admin', adminId);
+}
+export function verifyAdminToken(token) {
+  return verifyToken(token, 'admin'); 
+}
