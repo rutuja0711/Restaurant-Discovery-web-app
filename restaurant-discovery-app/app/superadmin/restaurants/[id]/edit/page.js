@@ -20,7 +20,7 @@ export default function EditRestaurant() {
   return (
     <>
       <Navbar />
-      <main className="admin-page">
+      <main className="py-6">
         <h1>Edit Restaurant</h1>
         <RestaurantForm initialData={data} restaurantId={id} />
       </main>

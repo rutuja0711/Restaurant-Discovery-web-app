@@ -58,7 +58,6 @@ export default function LocationPicker({ initialLat, initialLng, onChange }) {
     };
   }, []);
 
-  // Re-center the map + marker whenever a new geocoded position comes in
   useEffect(() => {
     if (mapInstance.current && markerInstance.current && initialLat && initialLng) {
       mapInstance.current.setView([initialLat, initialLng], 15);
@@ -68,9 +67,9 @@ export default function LocationPicker({ initialLat, initialLng, onChange }) {
 
   return (
     <div>
-      <div ref={mapRef} className="location-picker-map" />
-      {!ready && <p className="wizard-hint">Loading map...</p>}
-      <p className="wizard-hint">We've placed a pin based on your address, drag it if it's not quite right.</p>
+      <div ref={mapRef} className="z-[1] h-[280px] rounded-[14px] shadow-card-sm" />
+      {!ready && <p className="m-0 mb-1.5 text-[13px] text-text-muted">Loading map...</p>}
+      <p className="m-0 mb-1.5 text-[13px] text-text-muted">We&apos;ve placed a pin based on your address, drag it if it&apos;s not quite right.</p>
     </div>
   );
 }

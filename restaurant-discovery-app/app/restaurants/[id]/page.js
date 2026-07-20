@@ -4,6 +4,13 @@ import { useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+const inputClass =
+  "rounded-[10px] border-none bg-white px-4 py-3.5 text-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-forest";
+const formClass =
+  "my-4 mb-8 flex max-w-[480px] flex-col gap-3 rounded-[18px] bg-glass p-[22px] shadow-card-sm backdrop-blur-[14px]";
+const buttonClass =
+  "cursor-pointer rounded-[10px] border-none bg-forest px-4 py-3.5 text-sm font-semibold text-white shadow-card-sm hover:bg-forest-dark disabled:opacity-70";
+
 export default function RestaurantDetails() {
   const { id } = useParams();
   const [restaurant, setRestaurant] = useState(null);
@@ -70,6 +77,7 @@ export default function RestaurantDetails() {
       setReviewError(data.error || "Something went wrong");
     }
   }
+
   async function handleBookingSubmit(e) {
     e.preventDefault();
     setBookingError("");
@@ -109,14 +117,14 @@ export default function RestaurantDetails() {
     return (
       <>
         <Navbar />
-        <p className="state-msg">Loading restaurant...</p>
+        <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">Loading restaurant...</p>
       </>
     );
   if (error)
     return (
       <>
         <Navbar />
-        <p className="state-msg">{error}</p>
+        <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">{error}</p>
       </>
     );
 
@@ -147,59 +155,56 @@ export default function RestaurantDetails() {
   return (
     <>
       <Navbar />
-      <main className="details-page">
-        <p className="breadcrumb">
-          <a href="/">Home</a> /{" "}
-          <a href={`/?location=${restaurant.location}`}>
+      <main className="mx-auto max-w-[1100px] px-0 py-6">
+        <p className="mb-4 text-[13px] text-text-muted">
+          <a href="/" className="text-text-muted hover:text-forest">Home</a> /{" "}
+          <a href={`/?location=${restaurant.location}`} className="text-text-muted hover:text-forest">
             {restaurant.location}
           </a>{" "}
           / {restaurant.name}
         </p>
 
-        <div className="details-header">
+        <div className="mb-5 flex items-start justify-between max-[700px]:flex-col max-[700px]:gap-3">
           <div>
             <h1>{restaurant.name}</h1>
-            <p className="details-subline">{cuisines.join(", ")}</p>
-            <p className="details-subline">{restaurant.address}</p>
-            <p className="details-subline">
+            <p className="mt-1 text-sm text-text-muted">{cuisines.join(", ")}</p>
+            <p className="mt-1 text-sm text-text-muted">{restaurant.address}</p>
+            <p className="mt-1 text-sm text-text-muted">
               {restaurant.openingHours} · {restaurant.priceRange} ·{" "}
               {restaurant.contactNumber}
             </p>
           </div>
-          <div className="rating-badge-group">
-            <div className="rating-badge">
-              <span>★ {restaurant.rating}</span>
-              <small>{restaurant.reviews?.length || 0} Ratings</small>
+          <div className="flex gap-2.5">
+            <div className="min-w-[70px] rounded-[10px] bg-success px-3.5 py-2 text-center text-white">
+              <span className="block text-[15px] font-bold">★ {restaurant.rating}</span>
+              <small className="text-[10px] opacity-85">{restaurant.reviews?.length || 0} Ratings</small>
             </div>
           </div>
         </div>
 
-        <div className="action-row">
-          {/* <a className="action-btn" target="_blank" rel="noreferrer" href={`https://www.google.com/maps?q=${mapQuery}`}>Directions</a> */}
+        <div className="my-4 mb-5 flex flex-wrap gap-2.5">
           <a
-            className="action-btn"
+            className="inline-block cursor-pointer rounded-[10px] border-none bg-white px-[18px] py-2.5 text-[13px] font-medium text-forest-dark shadow-card-sm no-underline"
             target="_blank"
             rel="noreferrer"
             href={directionsUrl}
           >
             Directions
           </a>
-          {/* <button className="action-btn" onClick={() => setActiveTab('reviews')}>Reviews</button>
-          <button className="action-btn primary" onClick={() => setActiveTab('booking')}>Book a table</button> */}
         </div>
 
-        <div className="gallery">
+        <div className="mb-7 grid h-[340px] grid-cols-[2fr_1fr] gap-3 overflow-hidden rounded-[20px] shadow-card-md max-[700px]:h-auto max-[700px]:grid-cols-1">
           <div
-            className="gallery-main"
+            className="bg-cover bg-center"
             style={{ backgroundImage: `url(${images[0]})` }}
           />
-          <div className="gallery-side">
+          <div className="grid grid-rows-2 gap-3 max-[700px]:grid-cols-2 max-[700px]:grid-rows-[140px]">
             {images.slice(1, 3).map((img, i) => {
               const isLast = i === 1;
               return (
                 <div
                   key={i}
-                  className="gallery-thumb"
+                  className="relative bg-cover bg-center"
                   style={{
                     backgroundImage: `url(${img})`,
                     cursor: isLast ? "pointer" : "default",
@@ -207,7 +212,9 @@ export default function RestaurantDetails() {
                   onClick={isLast ? () => setActiveTab("photos") : undefined}
                 >
                   {isLast && (
-                    <div className="gallery-overlay">View Gallery</div>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/45 text-sm font-semibold text-white">
+                      View Gallery
+                    </div>
                   )}
                 </div>
               );
@@ -215,11 +222,15 @@ export default function RestaurantDetails() {
           </div>
         </div>
 
-        <div className="tabs">
+        <div className="mb-6 flex gap-2 border-b border-black/8">
           {["overview", "menu", "photos", "reviews", "booking"].map((tab) => (
             <button
               key={tab}
-              className={activeTab === tab ? "tab active" : "tab"}
+              className={`cursor-pointer border-none bg-transparent px-[18px] py-3 text-sm font-medium capitalize ${
+                activeTab === tab
+                  ? "border-b-2 border-forest text-forest"
+                  : "border-b-2 border-transparent text-text-muted"
+              }`}
               onClick={() => setActiveTab(tab)}
             >
               {tab === "booking"
@@ -230,34 +241,34 @@ export default function RestaurantDetails() {
         </div>
 
         {activeTab === "overview" && (
-          <div className="tab-panel">
-            <h2>About</h2>
+          <div>
+            <h2 className="mt-0">About</h2>
             <p>{restaurant.description || "No description added yet."}</p>
-            <div className="info-grid">
+            <div className="mt-6 grid grid-cols-2 gap-5">
               <div>
-                <h3>Price for two</h3>
-                <p>{restaurant.priceRange || "—"}</p>
+                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Price for two</h3>
+                <p className="m-0 text-[15px]">{restaurant.priceRange || "—"}</p>
               </div>
               <div>
-                <h3>Cuisine</h3>
-                <p>{cuisines.join(", ")}</p>
+                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Cuisine</h3>
+                <p className="m-0 text-[15px]">{cuisines.join(", ")}</p>
               </div>
               <div>
-                <h3>Opening hours</h3>
-                <p>{restaurant.openingHours || "—"}</p>
+                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Opening hours</h3>
+                <p className="m-0 text-[15px]">{restaurant.openingHours || "—"}</p>
               </div>
               <div>
-                <h3>Contact</h3>
-                <p>{restaurant.contactNumber || "—"}</p>
+                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Contact</h3>
+                <p className="m-0 text-[15px]">{restaurant.contactNumber || "—"}</p>
               </div>
             </div>
-            <h2 style={{ marginTop: "32px" }}>Location</h2>
-            <div className="map-embed">
+            <h2 className="mt-8">Location</h2>
+            <div className="mt-4 overflow-hidden rounded-2xl shadow-card-md">
               <iframe
                 title="restaurant-location"
                 width="100%"
                 height="320"
-                style={{ border: 0, borderRadius: "16px" }}
+                className="rounded-2xl border-0"
                 loading="lazy"
                 src={mapSrc}
               />
@@ -266,31 +277,31 @@ export default function RestaurantDetails() {
         )}
 
         {activeTab === "menu" && (
-          <div className="tab-panel">
-            <h2>Menu</h2>
+          <div>
+            <h2 className="mt-0">Menu</h2>
             {restaurant.menuItems?.length > 0 ? (
-              <div className="menu-list">
+              <div className="mt-4 flex flex-col gap-3">
                 {restaurant.menuItems.map((item) => (
-                  <div key={item.id} className="menu-item">
+                  <div key={item.id} className="flex justify-between rounded-xl bg-white px-[18px] py-3.5 text-sm shadow-card-sm">
                     <span>{item.name}</span>
-                    <span className="menu-price">{item.price}</span>
+                    <span className="font-semibold text-forest">{item.price}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="state-msg">Menu not added yet.</p>
+              <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">Menu not added yet.</p>
             )}
           </div>
         )}
 
         {activeTab === "photos" && (
-          <div className="tab-panel">
-            <h2>Photos</h2>
-            <div className="photos-grid">
+          <div>
+            <h2 className="mt-0">Photos</h2>
+            <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3.5">
               {images.map((img, i) => (
                 <div
                   key={i}
-                  className="photo-tile"
+                  className="h-40 rounded-[14px] bg-cover bg-center shadow-card-sm"
                   style={{ backgroundImage: `url(${img})` }}
                 />
               ))}
@@ -299,24 +310,27 @@ export default function RestaurantDetails() {
         )}
 
         {activeTab === "reviews" && (
-          <div className="tab-panel">
-            <h2>Reviews</h2>
+          <div>
+            <h2 className="mt-0">Reviews</h2>
 
-            <form className="review-form" onSubmit={handleReviewSubmit}>
-              <h3>Leave a review</h3>
+            <form className={formClass} onSubmit={handleReviewSubmit}>
+              <h3 className="mt-0 font-sans text-[15px]">Leave a review</h3>
               <input
                 placeholder="Your name"
                 value={reviewForm.reviewerName}
                 onChange={(e) =>
                   setReviewForm((p) => ({ ...p, reviewerName: e.target.value }))
                 }
+                className={inputClass}
               />
-              <div className="star-picker">
+              <div className="my-1 flex gap-1.5">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
                     key={n}
                     type="button"
-                    className={`star-btn ${n <= reviewForm.rating ? "filled" : ""}`}
+                    className={`cursor-pointer border-none bg-transparent p-0 text-[26px] leading-none transition hover:scale-110 ${
+                      n <= reviewForm.rating ? "text-accent-gold" : "text-[#d8d8d8]"
+                    }`}
                     onClick={() => setReviewForm((p) => ({ ...p, rating: n }))}
                     aria-label={`${n} star${n > 1 ? "s" : ""}`}
                   >
@@ -330,27 +344,28 @@ export default function RestaurantDetails() {
                 onChange={(e) =>
                   setReviewForm((p) => ({ ...p, comment: e.target.value }))
                 }
+                className={inputClass}
               />
-              {reviewError && <p className="field-error">{reviewError}</p>}
-              <button type="submit" disabled={reviewSubmitting}>
+              {reviewError && <p className="-mt-1.5 text-[13px] text-danger">{reviewError}</p>}
+              <button type="submit" disabled={reviewSubmitting} className={buttonClass}>
                 {reviewSubmitting ? "Posting..." : "Post review"}
               </button>
             </form>
 
-            <div className="reviews-list">
+            <div className="flex flex-col gap-3.5">
               {restaurant.reviews?.length > 0 ? (
                 restaurant.reviews.map((r) => (
-                  <div key={r.id} className="review-card">
-                    <div className="review-head">
+                  <div key={r.id} className="rounded-[14px] bg-white px-[18px] py-4 shadow-card-sm">
+                    <div className="mb-1.5 flex justify-between">
                       <strong>{r.reviewerName}</strong>
-                      <span className="review-stars">★ {r.rating}</span>
+                      <span className="font-semibold text-accent-gold">★ {r.rating}</span>
                     </div>
-                    <p>{r.comment}</p>
-                    <small>{new Date(r.createdAt).toLocaleDateString()}</small>
+                    <p className="m-0">{r.comment}</p>
+                    <small className="text-text-muted">{new Date(r.createdAt).toLocaleDateString()}</small>
                   </div>
                 ))
               ) : (
-                <p className="state-msg">
+                <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">
                   No reviews yet. Be the first to review.
                 </p>
               )}
@@ -358,25 +373,23 @@ export default function RestaurantDetails() {
           </div>
         )}
 
-        
-
-    
         {activeTab === "booking" && (
-          <div className="tab-panel">
-            <h2>Book a Table</h2>
+          <div>
+            <h2 className="mt-0">Book a Table</h2>
             {bookingSuccess ? (
-              <p className="state-msg">
+              <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">
                 Request sent! The restaurant will confirm your booking shortly. Track its status anytime at{" "}
-                <a href="/my-bookings">My Bookings</a>.
+                <a href="/my-bookings" className="font-medium text-forest">My Bookings</a>.
               </p>
             ) : (
-              <form className="review-form" onSubmit={handleBookingSubmit}>
+              <form className={formClass} onSubmit={handleBookingSubmit}>
                 <input
                   placeholder="Your name"
                   value={bookingForm.customerName}
                   onChange={(e) =>
                     setBookingForm((p) => ({ ...p, customerName: e.target.value }))
                   }
+                  className={inputClass}
                 />
                 <input
                   placeholder="Phone number"
@@ -384,6 +397,7 @@ export default function RestaurantDetails() {
                   onChange={(e) =>
                     setBookingForm((p) => ({ ...p, customerPhone: e.target.value }))
                   }
+                  className={inputClass}
                 />
                 <input
                   type="number"
@@ -393,6 +407,7 @@ export default function RestaurantDetails() {
                   onChange={(e) =>
                     setBookingForm((p) => ({ ...p, partySize: e.target.value }))
                   }
+                  className={inputClass}
                 />
                 <input
                   type="date"
@@ -400,6 +415,7 @@ export default function RestaurantDetails() {
                   onChange={(e) =>
                     setBookingForm((p) => ({ ...p, bookingDate: e.target.value }))
                   }
+                  className={inputClass}
                 />
                 <input
                   placeholder="Time"
@@ -408,6 +424,7 @@ export default function RestaurantDetails() {
                   onChange={(e) =>
                     setBookingForm((p) => ({ ...p, bookingTime: e.target.value }))
                   }
+                  className={inputClass}
                 />
                 <textarea
                   placeholder="Any special requests? (optional)"
@@ -415,9 +432,10 @@ export default function RestaurantDetails() {
                   onChange={(e) =>
                     setBookingForm((p) => ({ ...p, notes: e.target.value }))
                   }
+                  className={inputClass}
                 />
-                {bookingError && <p className="field-error">{bookingError}</p>}
-                <button type="submit" disabled={bookingSubmitting}>
+                {bookingError && <p className="-mt-1.5 text-[13px] text-danger">{bookingError}</p>}
+                <button type="submit" disabled={bookingSubmitting} className={buttonClass}>
                   {bookingSubmitting ? "Sending..." : "Request booking"}
                 </button>
               </form>
@@ -429,4 +447,3 @@ export default function RestaurantDetails() {
     </>
   );
 }
-     

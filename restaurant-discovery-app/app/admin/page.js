@@ -5,6 +5,11 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ConfirmationModal from '@/components/ConfirmationModal';
 
+const actionBtnClass = 'inline-block cursor-pointer rounded-[10px] border-none bg-white px-[18px] py-2.5 text-[13px] font-medium text-forest-dark shadow-card-sm no-underline';
+const tableClass = 'mt-5 w-full border-separate border-spacing-0 overflow-hidden rounded-2xl bg-white shadow-card-md';
+const thClass = 'bg-forest px-4 py-4 text-left text-sm font-semibold text-white';
+const tdClass = 'border-b border-black/4 px-4 py-4 text-left text-sm';
+
 export default function AdminDashboard() {
   const checked = useAdminOwnerGuard();
   const [restaurants, setRestaurants] = useState([]);
@@ -24,34 +29,38 @@ export default function AdminDashboard() {
   }
 
   if (!checked) return null;
-  if (loading) return <><Navbar /><p className="state-msg">Loading...</p></>;
+  if (loading) return <><Navbar /><p className="px-6 py-[60px] text-center text-[15px] text-text-muted">Loading...</p></>;
 
   return (
     <>
       <Navbar />
-      <main className="admin-page">
+      <main className="py-6">
         <h1>Manage My Restaurant</h1>
 
-        {restaurants.length === 0 && <p className="state-msg">You haven't added any restaurants yet.</p>}
+        {restaurants.length === 0 && <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">You haven&apos;t added any restaurants yet.</p>}
 
         {restaurants.length > 0 && (
-          <table>
-            <thead><tr><th>Name</th><th>Cuisine</th><th>Location</th><th>Actions</th></tr></thead>
+          <table className={tableClass}>
+            <thead><tr><th className={thClass}>Name</th><th className={thClass}>Cuisine</th><th className={thClass}>Location</th><th className={thClass}>Actions</th></tr></thead>
             <tbody>
               {restaurants.map((r) => (
                 <tr key={r.id}>
-                  <td>{r.name}</td><td>{r.cuisine}</td><td>{r.location}</td>
-                  <td>
-                    <Link href={`/admin/restaurants/${r.id}/edit`}>Edit</Link>{' '}
-                    <button onClick={() => handleDelete(r.id)}>Delete</button>
+                  <td className={tdClass}>{r.name}</td>
+                  <td className={tdClass}>{r.cuisine}</td>
+                  <td className={tdClass}>{r.location}</td>
+                  <td className={tdClass}>
+                    <Link href={`/admin/restaurants/${r.id}/edit`} className="font-medium text-forest">Edit</Link>{' '}
+                    <button className="cursor-pointer rounded-lg border-none bg-white px-3.5 py-2 text-[13px] text-danger shadow-card-sm" onClick={() => handleDelete(r.id)}>Delete</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-        <Link href="/admin/restaurants/new" className="action-btn primary">+ Add restaurant</Link>
-        <Link href="/admin/bookings" className="action-btn">View bookings</Link>
+        <div className="mt-4 flex flex-wrap gap-2.5">
+          <Link href="/admin/restaurants/new" className={`${actionBtnClass} bg-forest text-white`}>+ Add restaurant</Link>
+          <Link href="/admin/bookings" className={actionBtnClass}>View bookings</Link>
+        </div>
 
         <ConfirmationModal
           open={showModal}

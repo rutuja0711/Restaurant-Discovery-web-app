@@ -37,38 +37,38 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="navbar">
-      <Link href="/" className="navbar-logo">🍽️ TableFinder</Link>
+    <nav className="-mx-6 -mt-6 mb-0 flex flex-wrap items-center justify-between bg-glass px-8 py-[18px] shadow-card-sm backdrop-blur-[14px] max-[700px]:relative max-[480px]:flex-col max-[480px]:gap-2.5 max-[480px]:p-3.5">
+      <Link href="/" className="font-serif text-[1.4rem] font-bold text-forest">🍽️ TableFinder</Link>
 
       <button
-        className="navbar-hamburger"
+        className="hidden cursor-pointer flex-col justify-center gap-[5px] border-none bg-transparent p-1.5 max-[700px]:flex"
         onClick={() => setMenuOpen((v) => !v)}
         aria-label="Toggle menu"
         aria-expanded={menuOpen}
       >
-        <span />
-        <span />
-        <span />
+        <span className="h-0.5 w-[22px] rounded-sm bg-forest-dark" />
+        <span className="h-0.5 w-[22px] rounded-sm bg-forest-dark" />
+        <span className="h-0.5 w-[22px] rounded-sm bg-forest-dark" />
       </button>
 
-      <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
-        <Link href="/">Home</Link>
-        <Link href="/#explore">Explore Cuisines</Link>
-        <Link href="/my-bookings">My Bookings</Link>
+      <div className={`flex gap-7 max-[700px]:mt-3 max-[700px]:hidden max-[700px]:w-full max-[700px]:flex-col max-[700px]:items-start max-[700px]:gap-3.5 max-[700px]:border-t max-[700px]:border-black/8 max-[700px]:pt-4 max-[700px]:pb-1 ${menuOpen ? 'max-[700px]:flex' : ''}`}>
+        <Link href="/" className="text-sm font-medium text-forest-dark hover:text-accent-gold">Home</Link>
+        <Link href="/#explore" className="text-sm font-medium text-forest-dark hover:text-accent-gold">Explore Cuisines</Link>
+        <Link href="/my-bookings" className="text-sm font-medium text-forest-dark hover:text-accent-gold">My Bookings</Link>
 
         {isSuperadminArea ? (
-          <button className="navbar-logout" onClick={handleSuperadminLogout}>Log out</button>
+          <button className="cursor-pointer rounded-lg border border-black/10 bg-transparent px-4 py-2 text-[13px] font-medium text-forest-dark hover:bg-black/5" onClick={handleSuperadminLogout}>Log out</button>
         ) : isAdminArea ? (
-          <button className="navbar-logout" onClick={handleAdminLogout}>Log out</button>
+          <button className="cursor-pointer rounded-lg border border-black/10 bg-transparent px-4 py-2 text-[13px] font-medium text-forest-dark hover:bg-black/5" onClick={handleAdminLogout}>Log out</button>
         ) : user ? (
           <>
-            <span className="navbar-user">Hi, {user.name}</span>
-            <button className="navbar-logout" onClick={handleUserLogout}>Log out</button>
+            <span className="text-sm font-medium text-forest-dark">Hi, {user.name}</span>
+            <button className="cursor-pointer rounded-lg border border-black/10 bg-transparent px-4 py-2 text-[13px] font-medium text-forest-dark hover:bg-black/5" onClick={handleUserLogout}>Log out</button>
           </>
         ) : (
           <>
-            <Link href="/login">Log in</Link>
-            <Link href="/register">Sign up</Link>
+            <Link href="/login" className="text-sm font-medium text-forest-dark hover:text-accent-gold">Log in</Link>
+            <Link href="/register" className="text-sm font-medium text-forest-dark hover:text-accent-gold">Sign up</Link>
           </>
         )}
       </div>

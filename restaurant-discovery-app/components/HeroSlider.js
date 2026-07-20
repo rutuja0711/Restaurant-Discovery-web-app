@@ -23,29 +23,24 @@ export default function HeroSlider({ onSearch }) {
   }
 
   return (
-    <section className="hero" style={{ backgroundImage: `url(${slides[index].image})` }}>
-      <div className="hero-overlay">
-        <h1>{slides[index].title}</h1>
-        <p>{slides[index].subtitle}</p>
-        <form onSubmit={handleSubmit} className="hero-search">
+    <section
+      className="-mx-6 flex min-h-[480px] items-center justify-center overflow-hidden rounded-b-[32px] bg-cover bg-center"
+      style={{ backgroundImage: `url(${slides[index].image})` }}
+    >
+      <div className="flex h-full w-full flex-col items-center justify-center bg-white/15 px-5 py-[60px] text-center backdrop-blur-[6px]">
+        <h1 className="m-0 mb-2.5 text-[2.8rem] text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.3)] max-[480px]:text-3xl">{slides[index].title}</h1>
+        <p className="m-0 mb-6 text-base text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">{slides[index].subtitle}</p>
+        <form onSubmit={handleSubmit} className="flex w-full max-w-[520px] gap-2.5 rounded-[14px] bg-glass p-2 shadow-card-lg backdrop-blur-[14px]">
           <input
             type="text"
             placeholder="Search Restaurants By Name."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            className="flex-1 rounded-[10px] border-none bg-white px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-forest"
           />
-          <button type="submit">Search</button>
+          <button type="submit" className="cursor-pointer rounded-[10px] border-none bg-forest px-6 py-3.5 font-semibold text-white shadow-card-sm hover:bg-forest-dark">Search</button>
         </form>
-        <div className="hero-dots">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              className={i === index ? 'dot active' : 'dot'}
-              onClick={() => setIndex(i)}
-              aria-label={`Slide ${i + 1}`}
-            />
-          ))}
-        </div>
+        
       </div>
     </section>
   );

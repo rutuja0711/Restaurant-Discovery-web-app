@@ -9,7 +9,7 @@ export default function NewRestaurant() {
   return (
     <>
       <Navbar />
-      <main className="admin-page">
+      <main className="py-6">
         <h1>Add Restaurant</h1>
         <RestaurantForm apiBase="/api/admin/restaurants" redirectTo="/admin" />
       </main>

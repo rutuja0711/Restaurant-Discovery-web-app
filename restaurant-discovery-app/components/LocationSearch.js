@@ -19,5 +19,12 @@ export default function LocationSearch({ onPlaceSelected }) {
     });
   }, [onPlaceSelected]);
 
-  return <input ref={inputRef} type="text" placeholder="Search for area, street name..." className="location-search-input" />;
+  return (
+    <input
+      ref={inputRef}
+      type="text"
+      placeholder="Search for area, street name..."
+      className="w-full rounded-[10px] border-none bg-white px-4 py-3 text-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-forest"
+    />
+  );
 }

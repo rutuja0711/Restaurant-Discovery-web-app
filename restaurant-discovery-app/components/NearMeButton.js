@@ -26,11 +26,16 @@ export default function NearMeButton({ onLocationFound }) {
   }
 
   return (
-    <div className="near-me-wrap">
-      <button type="button" className="near-me-btn" onClick={handleClick} disabled={loading}>
+    <div className="flex flex-col">
+      <button
+        type="button"
+        className="cursor-pointer rounded-[10px] border-none bg-forest px-[18px] py-2.5 text-[13px] font-semibold text-white shadow-card-sm disabled:cursor-wait disabled:opacity-70"
+        onClick={handleClick}
+        disabled={loading}
+      >
         📍 {loading ? 'Finding you...' : 'Explore restaurants nearby'}
       </button>
-      {error && <p className="field-error">{error}</p>}
+      {error && <p className="-mt-1.5 text-[13px] text-danger">{error}</p>}
     </div>
   );
 }

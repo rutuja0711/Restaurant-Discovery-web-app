@@ -22,8 +22,8 @@ export default function RestaurantDetails() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <><Navbar /><p className="state-msg">Loading restaurant...</p></>;
-  if (error) return <><Navbar /><p className="state-msg">{error}</p></>;
+  if (loading) return <><Navbar /><p className="px-6 py-[60px] text-center text-[15px] text-text-muted">Loading restaurant...</p></>;
+  if (error) return <><Navbar /><p className="px-6 py-[60px] text-center text-[15px] text-text-muted">{error}</p></>;
 
   const images = restaurant.images?.length > 0
     ? restaurant.images.map((img) => img.imageUrl)
@@ -38,73 +38,89 @@ export default function RestaurantDetails() {
   return (
     <>
       <Navbar />
-      <main className="details-page">
-        <p className="breadcrumb">
-          <a href="/">Home</a> / <a href={`/?location=${restaurant.location}`}>{restaurant.location}</a> / {restaurant.name}
+      <main className="mx-auto max-w-[1100px] px-0 py-6">
+        <p className="mb-4 text-[13px] text-text-muted">
+          <a href="/" className="text-text-muted hover:text-forest">Home</a> / <a href={`/?location=${restaurant.location}`} className="text-text-muted hover:text-forest">{restaurant.location}</a> / {restaurant.name}
         </p>
 
-        <div className="details-header">
+        <div className="mb-5 flex items-start justify-between max-[700px]:flex-col max-[700px]:gap-3">
           <div>
             <h1>{restaurant.name}</h1>
-            <p className="details-subline">
+            <p className="mt-1 text-sm text-text-muted">
               {restaurant.cuisine} · {restaurant.address}
             </p>
           </div>
-          <div className="details-rating-badge">★ {restaurant.rating}</div>
+          <div className="rounded-xl bg-forest px-[18px] py-2.5 font-semibold text-white shadow-card-sm">
+            ★ {restaurant.rating}
+          </div>
         </div>
 
-        <div className="gallery">
-          <div className="gallery-main" style={{ backgroundImage: `url(${images[0]})` }} />
-          <div className="gallery-side">
+        <div className="mb-7 grid h-[340px] grid-cols-[2fr_1fr] gap-3 overflow-hidden rounded-[20px] shadow-card-md max-[700px]:h-auto max-[700px]:grid-cols-1">
+          <div className="bg-cover bg-center" style={{ backgroundImage: `url(${images[0]})` }} />
+          <div className="grid grid-rows-2 gap-3 max-[700px]:grid-cols-2 max-[700px]:grid-rows-[140px]">
             {images.slice(1, 3).map((img, i) => (
-              <div key={i} className="gallery-thumb" style={{ backgroundImage: `url(${img})` }} />
+              <div key={i} className="bg-cover bg-center" style={{ backgroundImage: `url(${img})` }} />
             ))}
           </div>
         </div>
 
-        <div className="details-body">
-          <div className="details-main">
-            <div className="tabs">
-              <button className={activeTab === 'overview' ? 'tab active' : 'tab'} onClick={() => setActiveTab('overview')}>Overview</button>
-              <button className={activeTab === 'location' ? 'tab active' : 'tab'} onClick={() => setActiveTab('location')}>Location</button>
+        <div className="grid grid-cols-[2fr_1fr] items-start gap-8 max-[700px]:grid-cols-1">
+          <div>
+            <div className="mb-6 flex gap-2 border-b border-black/8">
+              <button
+                className={`cursor-pointer border-none bg-transparent px-[18px] py-3 text-sm font-medium ${
+                  activeTab === 'overview' ? 'border-b-2 border-forest text-forest' : 'border-b-2 border-transparent text-text-muted'
+                }`}
+                onClick={() => setActiveTab('overview')}
+              >
+                Overview
+              </button>
+              <button
+                className={`cursor-pointer border-none bg-transparent px-[18px] py-3 text-sm font-medium ${
+                  activeTab === 'location' ? 'border-b-2 border-forest text-forest' : 'border-b-2 border-transparent text-text-muted'
+                }`}
+                onClick={() => setActiveTab('location')}
+              >
+                Location
+              </button>
             </div>
 
             {activeTab === 'overview' && (
-              <div className="tab-panel">
-                <h2>About</h2>
+              <div>
+                <h2 className="mt-0">About</h2>
                 <p>{restaurant.description}</p>
 
-                <div className="info-grid">
+                <div className="mt-6 grid grid-cols-2 gap-5">
                   <div>
-                    <h3>Price range</h3>
-                    <p>{restaurant.priceRange}</p>
+                    <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Price range</h3>
+                    <p className="m-0 text-[15px]">{restaurant.priceRange}</p>
                   </div>
                   <div>
-                    <h3>Cuisine</h3>
-                    <p>{restaurant.cuisine}</p>
+                    <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Cuisine</h3>
+                    <p className="m-0 text-[15px]">{restaurant.cuisine}</p>
                   </div>
                   <div>
-                    <h3>Opening hours</h3>
-                    <p>{restaurant.openingHours}</p>
+                    <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Opening hours</h3>
+                    <p className="m-0 text-[15px]">{restaurant.openingHours}</p>
                   </div>
                   <div>
-                    <h3>Contact</h3>
-                    <p>{restaurant.contactNumber}</p>
+                    <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Contact</h3>
+                    <p className="m-0 text-[15px]">{restaurant.contactNumber}</p>
                   </div>
                 </div>
               </div>
             )}
 
             {activeTab === 'location' && (
-              <div className="tab-panel">
-                <h2>Location</h2>
+              <div>
+                <h2 className="mt-0">Location</h2>
                 <p>{restaurant.address}, {restaurant.location}</p>
-                <div className="map-embed">
+                <div className="mt-4 overflow-hidden rounded-2xl shadow-card-md">
                   <iframe
                     title="restaurant-location"
                     width="100%"
                     height="360"
-                    style={{ border: 0, borderRadius: '16px' }}
+                    className="rounded-2xl border-0"
                     loading="lazy"
                     src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
                   />
@@ -112,16 +128,30 @@ export default function RestaurantDetails() {
               </div>
             )}
           </div>
-          
 
-          <aside className="details-sidebar">
-            <h3>Restaurant info</h3>
-            <ul className="info-list">
-              <li><strong>Address</strong><span>{restaurant.address}</span></li>
-              <li><strong>Hours</strong><span>{restaurant.openingHours}</span></li>
-              <li><strong>Contact</strong><span>{restaurant.contactNumber}</span></li>
-              <li><strong>Price range</strong><span>{restaurant.priceRange}</span></li>
-              <li><strong>Rating</strong><span>★ {restaurant.rating}</span></li>
+          <aside className="sticky top-6 rounded-[20px] bg-white p-6 shadow-card-md">
+            <h3 className="mt-0">Restaurant info</h3>
+            <ul className="m-0 mt-4 flex list-none flex-col gap-3.5 p-0">
+              <li className="flex flex-col gap-0.5 border-b border-black/5 pb-3 text-sm">
+                <strong className="text-xs tracking-wide text-text-muted uppercase">Address</strong>
+                <span>{restaurant.address}</span>
+              </li>
+              <li className="flex flex-col gap-0.5 border-b border-black/5 pb-3 text-sm">
+                <strong className="text-xs tracking-wide text-text-muted uppercase">Hours</strong>
+                <span>{restaurant.openingHours}</span>
+              </li>
+              <li className="flex flex-col gap-0.5 border-b border-black/5 pb-3 text-sm">
+                <strong className="text-xs tracking-wide text-text-muted uppercase">Contact</strong>
+                <span>{restaurant.contactNumber}</span>
+              </li>
+              <li className="flex flex-col gap-0.5 border-b border-black/5 pb-3 text-sm">
+                <strong className="text-xs tracking-wide text-text-muted uppercase">Price range</strong>
+                <span>{restaurant.priceRange}</span>
+              </li>
+              <li className="flex flex-col gap-0.5 border-b border-black/5 pb-3 text-sm">
+                <strong className="text-xs tracking-wide text-text-muted uppercase">Rating</strong>
+                <span>★ {restaurant.rating}</span>
+              </li>
             </ul>
           </aside>
         </div>
