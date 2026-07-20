@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useAdminOwnerGuard } from '@/lib/useAdminOwnerGuard';
 import Navbar from '@/components/Navbar';
+import LazyLoader from '@/components/LazyLoader';
 
 const tableClass = 'mt-5 w-full border-separate border-spacing-0 overflow-hidden rounded-2xl bg-white shadow-card-md';
 const thClass = 'bg-forest px-4 py-4 text-left text-sm font-semibold text-white';
@@ -26,7 +27,7 @@ export default function AdminBookings() {
   }
 
   if (!checked) return null;
-  if (loading) return <><Navbar /><p className="px-6 py-[60px] text-center text-[15px] text-text-muted">Loading...</p></>;
+  if (loading) return <><Navbar /><LazyLoader fullPage message="Loading bookings..." /></>;
 
   return (
     <>

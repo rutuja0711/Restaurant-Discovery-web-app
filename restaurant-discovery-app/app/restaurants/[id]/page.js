@@ -3,13 +3,20 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LazyLoader from "@/components/LazyLoader";
 
 const inputClass =
-  "rounded-[10px] border-none bg-white px-4 py-3.5 text-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-forest";
+  "w-full rounded-[10px] border-none bg-white px-4 py-3.5 text-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-forest";
 const formClass =
-  "my-4 mb-8 flex max-w-[480px] flex-col gap-3 rounded-[18px] bg-glass p-[22px] shadow-card-sm backdrop-blur-[14px]";
+  "my-4 mb-8 flex w-full max-w-[480px] flex-col gap-3 rounded-[18px] bg-glass p-[22px] shadow-card-sm backdrop-blur-[14px] max-[480px]:max-w-none max-[480px]:p-4";
 const buttonClass =
   "cursor-pointer rounded-[10px] border-none bg-forest px-4 py-3.5 text-sm font-semibold text-white shadow-card-sm hover:bg-forest-dark disabled:opacity-70";
+const tabClass = (active) =>
+  `shrink-0 cursor-pointer border-none bg-transparent px-[18px] py-3 text-sm font-medium capitalize max-[480px]:px-3 max-[480px]:py-2.5 max-[480px]:text-[13px] ${
+    active
+      ? "border-b-2 border-forest text-forest"
+      : "border-b-2 border-transparent text-text-muted"
+  }`;
 
 export default function RestaurantDetails() {
   const { id } = useParams();
@@ -117,7 +124,7 @@ export default function RestaurantDetails() {
     return (
       <>
         <Navbar />
-        <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">Loading restaurant...</p>
+        <LazyLoader fullPage message="Loading restaurant..." />
       </>
     );
   if (error)
@@ -155,8 +162,8 @@ export default function RestaurantDetails() {
   return (
     <>
       <Navbar />
-      <main className="mx-auto max-w-[1100px] px-0 py-6">
-        <p className="mb-4 text-[13px] text-text-muted">
+      <main className="mx-auto w-full max-w-[1100px] px-2 py-6 max-[480px]:px-0 max-[480px]:py-4">
+        <p className="mb-4 break-words text-[13px] leading-relaxed text-text-muted max-[480px]:text-xs">
           <a href="/" className="text-text-muted hover:text-forest">Home</a> /{" "}
           <a href={`/?location=${restaurant.location}`} className="text-text-muted hover:text-forest">
             {restaurant.location}
@@ -164,17 +171,20 @@ export default function RestaurantDetails() {
           / {restaurant.name}
         </p>
 
-        <div className="mb-5 flex items-start justify-between max-[700px]:flex-col max-[700px]:gap-3">
-          <div>
-            <h1>{restaurant.name}</h1>
+        <div className="mb-5 flex items-start justify-between gap-4 max-[700px]:flex-col max-[700px]:gap-3">
+          <div className="min-w-0 flex-1">
+            <h1 className="break-words">{restaurant.name}</h1>
             <p className="mt-1 text-sm text-text-muted">{cuisines.join(", ")}</p>
-            <p className="mt-1 text-sm text-text-muted">{restaurant.address}</p>
-            <p className="mt-1 text-sm text-text-muted">
-              {restaurant.openingHours} · {restaurant.priceRange} ·{" "}
-              {restaurant.contactNumber}
+            <p className="mt-1 break-words text-sm text-text-muted">{restaurant.address}</p>
+            <p className="mt-1 text-sm text-text-muted max-[480px]:flex max-[480px]:flex-col max-[480px]:gap-1">
+              <span>{restaurant.openingHours}</span>
+              <span className="max-[480px]:hidden"> · </span>
+              <span>{restaurant.priceRange}</span>
+              <span className="max-[480px]:hidden"> · </span>
+              <span>{restaurant.contactNumber}</span>
             </p>
           </div>
-          <div className="flex gap-2.5">
+          <div className="flex shrink-0 gap-2.5 max-[700px]:w-full max-[480px]:justify-start">
             <div className="min-w-[70px] rounded-[10px] bg-success px-3.5 py-2 text-center text-white">
               <span className="block text-[15px] font-bold">★ {restaurant.rating}</span>
               <small className="text-[10px] opacity-85">{restaurant.reviews?.length || 0} Ratings</small>
@@ -193,18 +203,18 @@ export default function RestaurantDetails() {
           </a>
         </div>
 
-        <div className="mb-7 grid h-[340px] grid-cols-[2fr_1fr] gap-3 overflow-hidden rounded-[20px] shadow-card-md max-[700px]:h-auto max-[700px]:grid-cols-1">
+        <div className="mb-7 grid h-[340px] grid-cols-[2fr_1fr] gap-3 overflow-hidden rounded-[20px] shadow-card-md max-[700px]:h-auto max-[700px]:grid-cols-1 max-[480px]:rounded-2xl">
           <div
-            className="bg-cover bg-center"
+            className="min-h-[220px] bg-cover bg-center max-[700px]:min-h-[240px] max-[480px]:min-h-[200px]"
             style={{ backgroundImage: `url(${images[0]})` }}
           />
-          <div className="grid grid-rows-2 gap-3 max-[700px]:grid-cols-2 max-[700px]:grid-rows-[140px]">
+          <div className="grid grid-rows-2 gap-3 max-[700px]:grid-cols-2 max-[700px]:grid-rows-[140px] max-[480px]:grid-rows-[120px]">
             {images.slice(1, 3).map((img, i) => {
               const isLast = i === 1;
               return (
                 <div
                   key={i}
-                  className="relative bg-cover bg-center"
+                  className="relative min-h-[120px] bg-cover bg-center max-[700px]:min-h-[140px] max-[480px]:min-h-[120px]"
                   style={{
                     backgroundImage: `url(${img})`,
                     cursor: isLast ? "pointer" : "default",
@@ -212,7 +222,7 @@ export default function RestaurantDetails() {
                   onClick={isLast ? () => setActiveTab("photos") : undefined}
                 >
                   {isLast && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/45 text-sm font-semibold text-white">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/45 text-sm font-semibold text-white max-[480px]:text-xs">
                       View Gallery
                     </div>
                   )}
@@ -222,29 +232,27 @@ export default function RestaurantDetails() {
           </div>
         </div>
 
-        <div className="mb-6 flex gap-2 border-b border-black/8">
-          {["overview", "menu", "photos", "reviews", "booking"].map((tab) => (
-            <button
-              key={tab}
-              className={`cursor-pointer border-none bg-transparent px-[18px] py-3 text-sm font-medium capitalize ${
-                activeTab === tab
-                  ? "border-b-2 border-forest text-forest"
-                  : "border-b-2 border-transparent text-text-muted"
-              }`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab === "booking"
-                ? "Book a Table"
-                : tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+        <div className="-mx-2 mb-6 overflow-x-auto border-b border-black/8 max-[480px]:-mx-0">
+          <div className="flex min-w-max gap-1 px-2 max-[480px]:gap-0 max-[480px]:px-0">
+            {["overview", "menu", "photos", "reviews", "booking"].map((tab) => (
+              <button
+                key={tab}
+                className={tabClass(activeTab === tab)}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab === "booking"
+                  ? "Book a Table"
+                  : tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
 
         {activeTab === "overview" && (
           <div>
             <h2 className="mt-0">About</h2>
             <p>{restaurant.description || "No description added yet."}</p>
-            <div className="mt-6 grid grid-cols-2 gap-5">
+            <div className="mt-6 grid grid-cols-2 gap-5 max-[480px]:grid-cols-1 max-[480px]:gap-4">
               <div>
                 <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Price for two</h3>
                 <p className="m-0 text-[15px]">{restaurant.priceRange || "—"}</p>
@@ -268,7 +276,7 @@ export default function RestaurantDetails() {
                 title="restaurant-location"
                 width="100%"
                 height="320"
-                className="rounded-2xl border-0"
+                className="h-[320px] w-full rounded-2xl border-0 max-[480px]:h-[240px]"
                 loading="lazy"
                 src={mapSrc}
               />
@@ -282,9 +290,9 @@ export default function RestaurantDetails() {
             {restaurant.menuItems?.length > 0 ? (
               <div className="mt-4 flex flex-col gap-3">
                 {restaurant.menuItems.map((item) => (
-                  <div key={item.id} className="flex justify-between rounded-xl bg-white px-[18px] py-3.5 text-sm shadow-card-sm">
-                    <span>{item.name}</span>
-                    <span className="font-semibold text-forest">{item.price}</span>
+                  <div key={item.id} className="flex items-start justify-between gap-3 rounded-xl bg-white px-[18px] py-3.5 text-sm shadow-card-sm max-[480px]:flex-col max-[480px]:gap-1 max-[480px]:px-4">
+                    <span className="min-w-0 break-words">{item.name}</span>
+                    <span className="shrink-0 font-semibold text-forest">{item.price}</span>
                   </div>
                 ))}
               </div>
@@ -297,11 +305,11 @@ export default function RestaurantDetails() {
         {activeTab === "photos" && (
           <div>
             <h2 className="mt-0">Photos</h2>
-            <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3.5">
+            <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3.5 max-[480px]:grid-cols-2 max-[480px]:gap-2.5">
               {images.map((img, i) => (
                 <div
                   key={i}
-                  className="h-40 rounded-[14px] bg-cover bg-center shadow-card-sm"
+                  className="h-40 rounded-[14px] bg-cover bg-center shadow-card-sm max-[480px]:h-28 max-[480px]:rounded-xl"
                   style={{ backgroundImage: `url(${img})` }}
                 />
               ))}
@@ -355,12 +363,12 @@ export default function RestaurantDetails() {
             <div className="flex flex-col gap-3.5">
               {restaurant.reviews?.length > 0 ? (
                 restaurant.reviews.map((r) => (
-                  <div key={r.id} className="rounded-[14px] bg-white px-[18px] py-4 shadow-card-sm">
-                    <div className="mb-1.5 flex justify-between">
-                      <strong>{r.reviewerName}</strong>
-                      <span className="font-semibold text-accent-gold">★ {r.rating}</span>
+                  <div key={r.id} className="rounded-[14px] bg-white px-[18px] py-4 shadow-card-sm max-[480px]:px-4">
+                    <div className="mb-1.5 flex items-start justify-between gap-3 max-[480px]:flex-col max-[480px]:gap-1">
+                      <strong className="break-words">{r.reviewerName}</strong>
+                      <span className="shrink-0 font-semibold text-accent-gold">★ {r.rating}</span>
                     </div>
-                    <p className="m-0">{r.comment}</p>
+                    <p className="m-0 break-words">{r.comment}</p>
                     <small className="text-text-muted">{new Date(r.createdAt).toLocaleDateString()}</small>
                   </div>
                 ))

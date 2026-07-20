@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import LazyLoader from '@/components/LazyLoader';
 
 export default function RestaurantDetails() {
   const { id } = useParams();
@@ -22,7 +23,7 @@ export default function RestaurantDetails() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <><Navbar /><p className="px-6 py-[60px] text-center text-[15px] text-text-muted">Loading restaurant...</p></>;
+  if (loading) return <><Navbar /><LazyLoader fullPage message="Loading restaurant..." /></>;
   if (error) return <><Navbar /><p className="px-6 py-[60px] text-center text-[15px] text-text-muted">{error}</p></>;
 
   const images = restaurant.images?.length > 0

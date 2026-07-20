@@ -8,9 +8,12 @@ import Footer from "@/components/Footer";
 import NearMeButton from "@/components/NearMeButton";
 import { getDistanceKm } from "@/lib/distance";
 import PlacesLocationSearch from "@/components/PlacesLocationSearch";
-
+import FilterDropdown from "@/components/FilterDropdown";
+import LazyLoader from "@/components/LazyLoader";
 const filterInputClass =
   "rounded-[10px] border-none bg-white px-4 py-3 text-sm text-forest-dark shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-forest";
+
+const PAGE_SIZE = 8;
 
 export default function Home() {
   const [restaurants, setRestaurants] = useState([]);
@@ -21,6 +24,7 @@ export default function Home() {
   const [cuisine, setCuisine] = useState("");
   const [userCoords, setUserCoords] = useState(null);
   const [radiusKm, setRadiusKm] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     setLoading(true);
@@ -34,6 +38,10 @@ export default function Home() {
       .catch(() => setError("Failed to load restaurants"))
       .finally(() => setLoading(false));
   }, [search, location, cuisine]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, location, cuisine, userCoords, radiusKm]);
 
   let displayedRestaurants = restaurants;
 
@@ -53,6 +61,12 @@ export default function Home() {
       .sort((a, b) => a.distanceKm - b.distanceKm);
   }
 
+  const totalPages = Math.ceil(displayedRestaurants.length / PAGE_SIZE);
+  const paginatedRestaurants = displayedRestaurants.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   return (
     <>
       <Navbar />
@@ -60,7 +74,7 @@ export default function Home() {
       <CuisineExplore onSelect={setCuisine} />
       <main id="listing">
         <div className="mb-4 flex flex-wrap items-center gap-3.5">
-          <h2 className="mt-3">
+          <h2>
             {userCoords
               ? "Restaurants near you"
               : cuisine
@@ -97,6 +111,32 @@ export default function Home() {
           onPlaceSelected={({ lat, lng }) => setUserCoords({ lat, lng })}
         />
 
+       
+
+        <FilterDropdown
+          label="All cuisines"
+          value={cuisine}
+          onChange={setCuisine}
+          options={[
+            { value: "", label: "All cuisines" },
+            { value: "North Indian", label: "North Indian" },
+            { value: "Italian", label: "Italian" },
+            { value: "Chinese", label: "Chinese" },
+            { value: "South Indian", label: "South Indian" },
+            { value: "American", label: "American" },
+          ]}
+        />
+  <FilterDropdown
+          label="All locations"
+          value={location}
+          onChange={setLocation}
+          options={[
+            { value: "", label: "All locations" },
+            { value: "Nashik", label: "Nashik" },
+            { value: "Pune", label: "Pune" },
+            { value: "Mumbai", label: "Mumbai" },
+          ]}
+        />
         <div className="mb-8 flex flex-wrap gap-3 rounded-[18px] bg-glass p-4 shadow-card-sm backdrop-blur-[12px] max-[480px]:flex-col">
           <input
             type="text"
@@ -105,16 +145,7 @@ export default function Home() {
             onChange={(e) => setSearch(e.target.value)}
             className={filterInputClass}
           />
-          <select
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className={filterInputClass}
-          >
-            <option value="">All locations</option>
-            <option value="Nashik">Nashik</option>
-            <option value="Pune">Pune</option>
-            <option value="Mumbai">Mumbai</option>
-          </select>
+         
           <select
             value={cuisine}
             onChange={(e) => setCuisine(e.target.value)}
@@ -142,7 +173,7 @@ export default function Home() {
           )}
         </div>
 
-        {loading && <p>Loading restaurants...</p>}
+        {loading && <LazyLoader message="Loading restaurants..." />}
         {error && <p>{error}</p>}
         {!loading && !error && displayedRestaurants.length === 0 && (
           <p>
@@ -152,18 +183,74 @@ export default function Home() {
           </p>
         )}
         {!loading && !error && displayedRestaurants.length > 0 && (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-[22px] max-[480px]:grid-cols-1">
-            {displayedRestaurants.map((r) => (
-              <a key={r.id} href={`/restaurants/${r.id}`}>
-                <RestaurantCard restaurant={r} />
-                {r.distanceKm !== undefined && (
-                  <p className="my-1 text-xs text-text-muted">
-                    {r.distanceKm.toFixed(1)} km away
-                  </p>
+          <>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-[22px] max-[480px]:grid-cols-1">
+              {paginatedRestaurants.map((r) => (
+                <a key={r.id} href={`/restaurants/${r.id}`}>
+                  <RestaurantCard restaurant={r} />
+                  {r.distanceKm !== undefined && (
+                    <p className="my-1 text-xs text-text-muted">
+                      {r.distanceKm.toFixed(1)} km away
+                    </p>
+                  )}
+                </a>
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  disabled={currentPage === 1}
+                  onClick={() => {
+                    setCurrentPage((p) => p - 1);
+                    document
+                      .getElementById("listing")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="cursor-pointer rounded-[10px] border-none bg-white px-4 py-2.5 text-sm font-medium text-forest-dark shadow-card-sm disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Previous
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => {
+                        setCurrentPage(page);
+                        document
+                          .getElementById("listing")
+                          ?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className={`cursor-pointer rounded-[10px] border-none px-3.5 py-2.5 text-sm font-medium shadow-card-sm ${
+                        page === currentPage
+                          ? "bg-forest text-white"
+                          : "bg-white text-forest-dark hover:bg-forest/5"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
                 )}
-              </a>
-            ))}
-          </div>
+
+                <button
+                  type="button"
+                  disabled={currentPage === totalPages}
+                  onClick={() => {
+                    setCurrentPage((p) => p + 1);
+                    document
+                      .getElementById("listing")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="cursor-pointer rounded-[10px] border-none bg-white px-4 py-2.5 text-sm font-medium text-forest-dark shadow-card-sm disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
       <Footer />

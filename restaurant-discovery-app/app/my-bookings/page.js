@@ -1,7 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import LazyLoader from '@/components/LazyLoader';
+import { useUserGuard } from '@/lib/useUserGuard';
 
 const statusLabels = {
   pending: 'Awaiting confirmation',
@@ -15,49 +17,60 @@ const statusColors = {
   declined: 'bg-red-100 text-danger',
 };
 
-const formClass = 'flex max-w-[420px] flex-col gap-3 rounded-[18px] bg-glass p-[22px] shadow-card-sm backdrop-blur-[14px]';
-const inputClass = 'rounded-[10px] border-none bg-white px-4 py-3.5 text-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] focus:outline-none focus:ring-2 focus:ring-forest';
-const buttonClass = 'cursor-pointer rounded-[10px] border-none bg-forest px-4 py-3.5 text-sm font-semibold text-white shadow-card-sm hover:bg-forest-dark disabled:opacity-70';
-
 export default function MyBookings() {
-  const [phone, setPhone] = useState('');
+  const { user, checked } = useUserGuard('/login?redirect=/my-bookings');
   const [bookings, setBookings] = useState(null);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  async function handleSearch(e) {
-    e.preventDefault();
-    setError('');
-    if (!phone.trim()) {
-      setError('Please enter the phone number you used to book.');
-      return;
-    }
+  useEffect(() => {
+    if (!checked) return;
+
     setLoading(true);
-    const res = await fetch(`/api/bookings/lookup?phone=${encodeURIComponent(phone.trim())}`);
-    const data = await res.json();
-    setLoading(false);
-    setBookings(data);
+    fetch('/api/bookings/me')
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load bookings');
+        return res.json();
+      })
+      .then((data) => setBookings(data))
+      .catch(() => setError('Could not load your bookings. Please try again.'))
+      .finally(() => setLoading(false));
+  }, [checked]);
+
+  if (!checked) {
+    return (
+      <>
+        <Navbar />
+        <LazyLoader fullPage message="Checking your account..." />
+        <Footer />
+      </>
+    );
   }
 
   return (
     <>
       <Navbar />
       <main className="mx-auto max-w-[1100px] px-0 py-6">
-        <h1>Track Your Booking</h1>
-        <p className="m-0 mb-1.5 text-[13px] text-text-muted">Enter the phone number you used when requesting a table.</p>
+        <h1>My Bookings</h1>
+        <p className="m-0 mb-6 text-[13px] text-text-muted">
+          Hi {user.name}, here are your table reservations.
+        </p>
 
-        <form onSubmit={handleSearch} className={formClass}>
-          <input placeholder="Phone number" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
-          {error && <p className="-mt-1.5 text-[13px] text-danger">{error}</p>}
-          <button type="submit" disabled={loading} className={buttonClass}>{loading ? 'Searching...' : 'Check status'}</button>
-        </form>
+        {loading && <LazyLoader message="Loading your bookings..." />}
 
-        {bookings && bookings.length === 0 && (
-          <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">No bookings found for this phone number.</p>
+        {!loading && error && (
+          <p className="px-6 py-[60px] text-center text-[15px] text-danger">{error}</p>
         )}
 
-        {bookings && bookings.length > 0 && (
-          <div className="mt-6 flex flex-col gap-3.5">
+        {!loading && !error && bookings?.length === 0 && (
+          <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">
+            You have no bookings yet.{' '}
+            <a href="/" className="font-medium text-forest">Browse restaurants</a> to book a table.
+          </p>
+        )}
+
+        {!loading && !error && bookings?.length > 0 && (
+          <div className="flex flex-col gap-3.5">
             {bookings.map((b) => (
               <div key={b.id} className="rounded-[14px] bg-white px-[18px] py-4 shadow-card-sm">
                 <div className="mb-1.5 flex justify-between">

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSuperadminGuard } from '@/lib/useSuperadminGuard';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import LazyLoader from '@/components/LazyLoader';
 import ConfirmationModal from '@/components/ConfirmationModal';
 
 const actionBtnClass = 'inline-block cursor-pointer rounded-[10px] border-none bg-forest px-[18px] py-2.5 text-[13px] font-medium text-white shadow-card-sm no-underline';
@@ -29,7 +30,7 @@ export default function AdminDashboard() {
   }
 
   if (!checked) return null;
-  if (loading) return <><Navbar /><p className="px-6 py-[60px] text-center text-[15px] text-text-muted">Loading...</p></>;
+  if (loading) return <><Navbar /><LazyLoader fullPage message="Loading dashboard..." /></>;
 
   return (
     <>

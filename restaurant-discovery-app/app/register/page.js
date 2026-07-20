@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 
@@ -12,6 +12,18 @@ export default function Register() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/auth/me').then((res) => res.json()),
+      fetch('/api/admin/me').then((res) => res.json()),
+      fetch('/api/superadmin/check').then((res) => res.ok),
+    ]).then(([userData, adminData, superadminOk]) => {
+      if (userData.user) router.replace('/');
+      else if (adminData.admin) router.replace('/admin');
+      else if (superadminOk) router.replace('/superadmin');
+    });
+  }, [router]);
 
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
