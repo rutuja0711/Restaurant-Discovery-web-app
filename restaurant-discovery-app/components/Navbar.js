@@ -65,7 +65,7 @@ export default function Navbar() {
     <button className={btnClass} onClick={handleAdminLogout}>Log out</button>
   ) : !authLoaded ? null : user ? (
     <>
-      <span className="text-sm font-medium text-forest-dark max-[700px]:w-full">Hi, {user.name}</span>
+      {/* <span className="text-sm font-medium text-forest-dark max-[700px]:w-full">Hi, {user.name}</span> */}
       <button className={btnClass} onClick={handleUserLogout}>Log out</button>
     </>
   ) : admin ? (

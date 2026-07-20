@@ -428,7 +428,7 @@ export default function RestaurantForm({
           {stepIndex > 0 && (
             <button
               type="button"
-              className="cursor-pointer rounded-[10px] border border-black/10 bg-forest px-5 py-3"
+              className="cursor-pointer rounded-[10px] border border-black/10 bg-forest text-white px-5 py-3"
               onClick={goBack}
             >
               Go back

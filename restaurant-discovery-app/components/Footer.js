@@ -16,7 +16,7 @@ export default function Footer() {
           <Link href="/" className="hover:text-gold">Home</Link>
           <Link href="/#explore" className="hover:text-gold">Explore Cuisines</Link>
           <Link href="/my-bookings" className="hover:text-gold">My Bookings</Link>
-          <Link href="/admin/login" className="hover:text-gold">Restaurant Owner</Link>
+          {/* <Link href="/admin/login" className="hover:text-gold">Restaurant Owner</Link> */}
         </div>
 
         <div className="mt-4 w-full border-t border-white/10 pt-4 text-xs text-white/50">

@@ -59,7 +59,7 @@ export default function AdminDashboard() {
           </table>
         )}
         <div className="mt-4 flex flex-wrap gap-2.5">
-          <Link href="/admin/restaurants/new" className={`${actionBtnClass} bg-forest text-white`}>+ Add restaurant</Link>
+          <Link href="/admin/restaurants/new" className={`${actionBtnClass} `}>+ Add restaurant</Link>
           <Link href="/admin/bookings" className={actionBtnClass}>View bookings</Link>
         </div>
 

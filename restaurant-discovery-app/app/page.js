@@ -81,8 +81,8 @@ export default function Home() {
                 ? `${cuisine} restaurants`
                 : "All restaurants"}
           </h2>
-          <NearMeButton onLocationFound={setUserCoords} />
-          {userCoords && (
+          {/* <NearMeButton onLocationFound={setUserCoords} /> */}
+          {/* {userCoords && (
             <>
               <select
                 value={radiusKm}
@@ -103,13 +103,13 @@ export default function Home() {
                 Clear nearby filter
               </button>
             </>
-          )}
-        </div>
+          )} */}
+          </div>
 
-        <PlacesLocationSearch
+        {/* <PlacesLocationSearch
           placeholder="Or search a location..."
           onPlaceSelected={({ lat, lng }) => setUserCoords({ lat, lng })}
-        />
+        /> */}
 
        
 

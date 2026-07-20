@@ -30,7 +30,7 @@ export default function AdminRegister() {
       <Navbar />
       <main className="flex justify-center px-5 py-[60px]">
         <form onSubmit={handleSubmit} className={formClass}>
-          <h1 className="mt-0">Register as Admin</h1>
+          <h1 className="mt-0">Register as Admin (Restaurant Owner)</h1>
           <p className="m-0 mb-1.5 text-[13px] text-text-muted">Create an account to manage your restaurant listing.</p>
           <input placeholder="Full name" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} className={inputClass} />
           <input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} className={inputClass} />
