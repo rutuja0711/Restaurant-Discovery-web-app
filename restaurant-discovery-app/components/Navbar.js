@@ -7,6 +7,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const isSuperadminArea = pathname?.startsWith('/superadmin') && pathname !== '/superadmin/login';
   const isAdminArea = pathname?.startsWith('/admin') && pathname !== '/admin/login' && pathname !== '/admin/register';
@@ -17,16 +18,18 @@ export default function Navbar() {
     fetch('/api/auth/me').then((res) => res.json()).then((data) => setUser(data.user));
   }, [pathname, isPrivilegedArea]);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
   async function handleSuperadminLogout() {
     await fetch('/api/superadmin/logout', { method: 'POST' });
     router.push('/superadmin/login');
   }
-
   async function handleAdminLogout() {
     await fetch('/api/admin/logout', { method: 'POST' });
     router.push('/admin/login');
   }
-
   async function handleUserLogout() {
     await fetch('/api/auth/logout', { method: 'POST' });
     setUser(null);
@@ -36,9 +39,22 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <Link href="/" className="navbar-logo">🍽️ TableFinder</Link>
-      <div className="navbar-links">
+
+      <button
+        className="navbar-hamburger"
+        onClick={() => setMenuOpen((v) => !v)}
+        aria-label="Toggle menu"
+        aria-expanded={menuOpen}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
         <Link href="/">Home</Link>
         <Link href="/#explore">Explore Cuisines</Link>
+        <Link href="/my-bookings">My Bookings</Link>
 
         {isSuperadminArea ? (
           <button className="navbar-logout" onClick={handleSuperadminLogout}>Log out</button>
@@ -53,7 +69,6 @@ export default function Navbar() {
           <>
             <Link href="/login">Log in</Link>
             <Link href="/register">Sign up</Link>
-            {/* <Link href="/admin/login">Admin</Link> */}
           </>
         )}
       </div>

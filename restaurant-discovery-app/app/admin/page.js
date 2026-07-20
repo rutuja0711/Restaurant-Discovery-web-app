@@ -51,6 +51,7 @@ export default function AdminDashboard() {
           </table>
         )}
         <Link href="/admin/restaurants/new" className="action-btn primary">+ Add restaurant</Link>
+        <Link href="/admin/bookings" className="action-btn">View bookings</Link>
 
         <ConfirmationModal
           open={showModal}

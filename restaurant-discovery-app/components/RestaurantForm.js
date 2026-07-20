@@ -179,18 +179,10 @@ export default function RestaurantForm({
       const allImageUrls = [...existingImages, ...uploadedUrls];
 
       // const url = isEdit
-      //   ? `/api/restaurants/${restaurantId}`            
+      //   ? `/api/restaurants/${restaurantId}`
       //   : "/api/restaurants";
       const url = isEdit ? `${apiBase}/${restaurantId}` : apiBase;
       const method = isEdit ? "PUT" : "POST";
-
-      // const url = isEdit ? `${apiBase}/${restaurantId}` : apiBase;
-
-      // const url = isEdit ? `${apiBase}/${restaurantId}` : apiBase;
-
-
-
-
 
 
 
@@ -443,8 +435,8 @@ export default function RestaurantForm({
           isEdit ? "Restaurant details updated" : "Restaurant listing submitted"
         }
         message="Your changes are live on the site now."
-        onClose={() => router.push(redirectTo)}
-        onSecondaryAction={() => router.push(redirectTo)}
+        onClose={() => router.push("/admin")}
+        onSecondaryAction={() => router.push("/admin")}
         secondaryLabel="Go to dashboard"
       />
     </div>

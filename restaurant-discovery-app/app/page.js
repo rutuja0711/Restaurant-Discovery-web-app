@@ -7,6 +7,7 @@ import CuisineExplore from "@/components/CuisineExplore";
 import Footer from "@/components/Footer";
 import NearMeButton from "@/components/NearMeButton";
 import { getDistanceKm } from "@/lib/distance";
+import PlacesLocationSearch from "@/components/PlacesLocationSearch";
 
 export default function Home() {
   const [restaurants, setRestaurants] = useState([]);
@@ -69,6 +70,11 @@ export default function Home() {
             </>
           )}
         </div>
+
+        <PlacesLocationSearch
+  placeholder="Or search a location..."
+  onPlaceSelected={({ lat, lng }) => setUserCoords({ lat, lng })}
+/>
 
         <div className="filters">
           <input

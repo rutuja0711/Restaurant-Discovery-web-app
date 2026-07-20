@@ -24,9 +24,13 @@ model Restaurant {
   longitude     Float?
   menuItems     MenuItem[]
   images        RestaurantImage[]
-  reviews       Review[]
+ 
   ownerId Int?
   owner   Admin? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  
+  reviews     Review[]
+  bookings    Booking[]
+  
 }
 
 model RestaurantImage {
@@ -73,4 +77,18 @@ model Admin {
   passwordHash String
   createdAt    DateTime     @default(now())
   restaurants  Restaurant[]
+}
+
+model Booking {
+  id             Int      @id @default(autoincrement())
+  restaurantId   Int
+  restaurant     Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  customerName   String
+  customerPhone  String
+  partySize      Int
+  bookingDate    String
+  bookingTime    String
+  notes          String?
+  status         String   @default("pending") // pending, confirmed, declined
+  createdAt      DateTime @default(now())
 }
