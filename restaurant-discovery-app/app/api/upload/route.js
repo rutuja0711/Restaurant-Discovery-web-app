@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server';
-import { verifySuperadminToken } from '@/lib/auth';
+import { verifySuperadminToken, verifyAdminToken } from '@/lib/auth';
 import { writeFile } from 'fs/promises';
 import path from 'path';
+import sharp from 'sharp';
 
 export async function POST(request) {
-  const token = request.cookies.get('superadmin_session')?.value;
-  if (!verifySuperadminToken(token)) {
+  const superadminToken = request.cookies.get('superadmin_session')?.value;
+  const adminToken = request.cookies.get('admin_session')?.value;
+
+  const isSuperadmin = verifySuperadminToken(superadminToken);
+  const isAdmin = verifyAdminToken(adminToken);
+
+  if (!isSuperadmin && !isAdmin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -22,11 +28,15 @@ export async function POST(request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const ext = path.extname(file.name) || '.jpg';
-    const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+    const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
     const filePath = path.join(process.cwd(), 'public', 'uploads', safeName);
 
-    await writeFile(filePath, buffer);
+    const converted = await sharp(buffer)
+      .resize({ width: 1600, withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toBuffer();
+
+    await writeFile(filePath, converted);
     urls.push(`/uploads/${safeName}`);
   }
 

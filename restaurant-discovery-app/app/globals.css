@@ -62,3 +62,5 @@
   outline: none;
   box-shadow: inset 0 0 0 2px var(--color-forest);
 }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

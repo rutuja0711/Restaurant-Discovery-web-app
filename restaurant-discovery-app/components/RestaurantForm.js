@@ -65,10 +65,13 @@ export default function RestaurantForm({
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  function geocodeInBrowser(address) {
+  async function geocodeInBrowser(address) {
+    if (!window.google?.maps?.importLibrary) return null;
+  
+    const { Geocoder } = await window.google.maps.importLibrary("geocoding");
+    const geocoder = new Geocoder();
+  
     return new Promise((resolve) => {
-      if (!window.google?.maps) return resolve(null);
-      const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode({ address }, (results, status) => {
         if (status === "OK" && results[0]) {
           const loc = results[0].geometry.location;
@@ -79,7 +82,6 @@ export default function RestaurantForm({
       });
     });
   }
-
   async function handleAddressBlur() {
     if (form.address && form.location) {
       const coords = await geocodeInBrowser(
@@ -122,8 +124,7 @@ export default function RestaurantForm({
     }
     if (index === 1) {
       if (!form.cuisine.trim()) e.cuisine = "Cuisine is required";
-      if (form.rating && (form.rating < 0 || form.rating > 5))
-        e.rating = "Rating must be 0-5";
+    
     }
     return e;
   }
@@ -332,15 +333,7 @@ export default function RestaurantForm({
               value={form.priceRange}
               onChange={(e) => update("priceRange", e.target.value)}
             />
-            <input
-              className={inputClass}
-              placeholder="Rating (0-5)"
-              type="number"
-              step="0.1"
-              value={form.rating}
-              onChange={(e) => update("rating", e.target.value)}
-            />
-            {errors.rating && <p className="-mt-1.5 text-[13px] text-danger">{errors.rating}</p>}
+            
             <input
               className={inputClass}
               placeholder="Opening hours (e.g. 12 PM - 11 PM)"

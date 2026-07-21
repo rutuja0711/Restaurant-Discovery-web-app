@@ -24,7 +24,8 @@ model Restaurant {
   longitude     Float?
   menuItems     MenuItem[]
   images        RestaurantImage[]
- 
+   tables      RestaurantTable[]
+
   ownerId Int?
   owner   Admin? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
   
@@ -32,7 +33,14 @@ model Restaurant {
   bookings    Booking[]
   
 }
-
+model RestaurantTable {
+  id           Int        @id @default(autoincrement())
+  tableNumber  String
+  capacity     Int
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  bookings     Booking[]
+}
 model RestaurantImage {
   id           Int        @id @default(autoincrement())
   imageUrl     String
@@ -63,6 +71,7 @@ model User {
   id           Int       @id @default(autoincrement())
   name         String
   email        String    @unique
+  phone        String?   @unique
   passwordHash String
   createdAt    DateTime  @default(now())
   bookings     Booking[]
@@ -86,12 +95,17 @@ model Booking {
   restaurant     Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   userId         Int?
   user           User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tableId        Int
+  table          RestaurantTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
   customerName   String
   customerPhone  String
   partySize      Int
+  slotStart      DateTime
+  slotEnd        DateTime
   bookingDate    String
   bookingTime    String
   notes          String?
   status         String     @default("pending") // pending, confirmed, declined
   createdAt      DateTime   @default(now())
+  @@unique([tableId, slotStart])
 }

@@ -119,6 +119,51 @@ export default function RestaurantDetails() {
       setBookingError(data.error || "Something went wrong");
     }
   }
+  async function handleBookingSubmit(e) {
+    e.preventDefault();
+    setBookingError("");
+    if (
+      !bookingForm.customerName.trim() ||
+      !bookingForm.customerPhone.trim() ||
+      !bookingForm.bookingDate ||
+      !bookingForm.bookingTime
+    ) {
+      setBookingError("Please fill in all required fields.");
+      return;
+    }
+
+    const slotStart = new Date(
+      `${bookingForm.bookingDate}T${bookingForm.bookingTime}`,
+    ).toISOString();
+
+    setBookingSubmitting(true);
+    const res = await fetch(`/api/restaurants/${id}/bookings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customerName: bookingForm.customerName,
+        customerPhone: bookingForm.customerPhone,
+        partySize: bookingForm.partySize,
+        slotStart,
+        notes: bookingForm.notes,
+      }),
+    });
+    setBookingSubmitting(false);
+    if (res.ok) {
+      setBookingSuccess(true);
+      setBookingForm({
+        customerName: "",
+        customerPhone: "",
+        partySize: 2,
+        bookingDate: "",
+        bookingTime: "",
+        notes: "",
+      });
+    } else {
+      const data = await res.json();
+      setBookingError(data.error || "Something went wrong");
+    }
+  }
 
   if (loading)
     return (
@@ -131,7 +176,9 @@ export default function RestaurantDetails() {
     return (
       <>
         <Navbar />
-        <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">{error}</p>
+        <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">
+          {error}
+        </p>
       </>
     );
 
@@ -164,8 +211,14 @@ export default function RestaurantDetails() {
       <Navbar />
       <main className="mx-auto w-full max-w-[1100px] px-2 py-6 max-[480px]:px-0 max-[480px]:py-4">
         <p className="mb-4 break-words text-[13px] leading-relaxed text-text-muted max-[480px]:text-xs">
-          <a href="/" className="text-text-muted hover:text-forest">Home</a> /{" "}
-          <a href={`/?location=${restaurant.location}`} className="text-text-muted hover:text-forest">
+          <a href="/" className="text-text-muted hover:text-forest">
+            Home
+          </a>{" "}
+          /{" "}
+          <a
+            href={`/?location=${restaurant.location}`}
+            className="text-text-muted hover:text-forest"
+          >
             {restaurant.location}
           </a>{" "}
           / {restaurant.name}
@@ -174,8 +227,12 @@ export default function RestaurantDetails() {
         <div className="mb-5 flex items-start justify-between gap-4 max-[700px]:flex-col max-[700px]:gap-3">
           <div className="min-w-0 flex-1">
             <h1 className="break-words">{restaurant.name}</h1>
-            <p className="mt-1 text-sm text-text-muted">{cuisines.join(", ")}</p>
-            <p className="mt-1 break-words text-sm text-text-muted">{restaurant.address}</p>
+            <p className="mt-1 text-sm text-text-muted">
+              {cuisines.join(", ")}
+            </p>
+            <p className="mt-1 break-words text-sm text-text-muted">
+              {restaurant.address}
+            </p>
             <p className="mt-1 text-sm text-text-muted max-[480px]:flex max-[480px]:flex-col max-[480px]:gap-1">
               <span>{restaurant.openingHours}</span>
               <span className="max-[480px]:hidden"> · </span>
@@ -186,8 +243,12 @@ export default function RestaurantDetails() {
           </div>
           <div className="flex shrink-0 gap-2.5 max-[700px]:w-full max-[480px]:justify-start">
             <div className="min-w-[70px] rounded-[10px] bg-success px-3.5 py-2 text-center text-white">
-              <span className="block text-[15px] font-bold">★ {restaurant.rating}</span>
-              <small className="text-[10px] opacity-85">{restaurant.reviews?.length || 0} Ratings</small>
+              <span className="block text-[15px] font-bold">
+                ★ {restaurant.rating}
+              </span>
+              <small className="text-[10px] opacity-85">
+                {restaurant.reviews?.length || 0} Ratings
+              </small>
             </div>
           </div>
         </div>
@@ -232,13 +293,21 @@ export default function RestaurantDetails() {
           </div>
         </div>
 
-        <div className="-mx-2 mb-6 overflow-x-auto border-b border-black/8 max-[480px]:-mx-0">
+        <div
+          id="tab-content"
+          className="-mx-2 mb-6 overflow-x-auto border-b border-black/8 max-[480px]:-mx-0"
+        >
           <div className="flex min-w-max gap-1 px-2 max-[480px]:gap-0 max-[480px]:px-0">
             {["overview", "menu", "photos", "reviews", "booking"].map((tab) => (
               <button
                 key={tab}
                 className={tabClass(activeTab === tab)}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => {
+                  setActiveTab(tab);
+                  document
+                    .getElementById("tab-content")
+                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
               >
                 {tab === "booking"
                   ? "Book a Table"
@@ -254,20 +323,34 @@ export default function RestaurantDetails() {
             <p>{restaurant.description || "No description added yet."}</p>
             <div className="mt-6 grid grid-cols-2 gap-5 max-[480px]:grid-cols-1 max-[480px]:gap-4">
               <div>
-                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Price for two</h3>
-                <p className="m-0 text-[15px]">{restaurant.priceRange || "—"}</p>
+                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">
+                  Price for two
+                </h3>
+                <p className="m-0 text-[15px]">
+                  {restaurant.priceRange || "—"}
+                </p>
               </div>
               <div>
-                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Cuisine</h3>
+                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">
+                  Cuisine
+                </h3>
                 <p className="m-0 text-[15px]">{cuisines.join(", ")}</p>
               </div>
               <div>
-                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Opening hours</h3>
-                <p className="m-0 text-[15px]">{restaurant.openingHours || "—"}</p>
+                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">
+                  Opening hours
+                </h3>
+                <p className="m-0 text-[15px]">
+                  {restaurant.openingHours || "—"}
+                </p>
               </div>
               <div>
-                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">Contact</h3>
-                <p className="m-0 text-[15px]">{restaurant.contactNumber || "—"}</p>
+                <h3 className="m-0 mb-1 font-sans text-[13px] tracking-wide text-text-muted uppercase">
+                  Contact
+                </h3>
+                <p className="m-0 text-[15px]">
+                  {restaurant.contactNumber || "—"}
+                </p>
               </div>
             </div>
             <h2 className="mt-8">Location</h2>
@@ -290,14 +373,21 @@ export default function RestaurantDetails() {
             {restaurant.menuItems?.length > 0 ? (
               <div className="mt-4 flex flex-col gap-3">
                 {restaurant.menuItems.map((item) => (
-                  <div key={item.id} className="flex items-start justify-between gap-3 rounded-xl bg-white px-[18px] py-3.5 text-sm shadow-card-sm max-[480px]:flex-col max-[480px]:gap-1 max-[480px]:px-4">
+                  <div
+                    key={item.id}
+                    className="flex items-start justify-between gap-3 rounded-xl bg-white px-[18px] py-3.5 text-sm shadow-card-sm max-[480px]:flex-col max-[480px]:gap-1 max-[480px]:px-4"
+                  >
                     <span className="min-w-0 break-words">{item.name}</span>
-                    <span className="shrink-0 font-semibold text-forest">{item.price}</span>
+                    <span className="shrink-0 font-semibold text-forest">
+                      {item.price}
+                    </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">Menu not added yet.</p>
+              <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">
+                Menu not added yet.
+              </p>
             )}
           </div>
         )}
@@ -321,62 +411,92 @@ export default function RestaurantDetails() {
           <div>
             <h2 className="mt-0">Reviews</h2>
 
-            <form className={formClass} onSubmit={handleReviewSubmit}>
-              <h3 className="mt-0 font-sans text-[15px]">Leave a review</h3>
-              <input
-                placeholder="Your name"
-                value={reviewForm.reviewerName}
-                onChange={(e) =>
-                  setReviewForm((p) => ({ ...p, reviewerName: e.target.value }))
-                }
-                className={inputClass}
-              />
-              <div className="my-1 flex gap-1.5">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    className={`cursor-pointer border-none bg-transparent p-0 text-[26px] leading-none transition hover:scale-110 ${
-                      n <= reviewForm.rating ? "text-accent-gold" : "text-[#d8d8d8]"
-                    }`}
-                    onClick={() => setReviewForm((p) => ({ ...p, rating: n }))}
-                    aria-label={`${n} star${n > 1 ? "s" : ""}`}
-                  >
-                    ★
-                  </button>
-                ))}
-              </div>
-              <textarea
-                placeholder="Share your experience..."
-                value={reviewForm.comment}
-                onChange={(e) =>
-                  setReviewForm((p) => ({ ...p, comment: e.target.value }))
-                }
-                className={inputClass}
-              />
-              {reviewError && <p className="-mt-1.5 text-[13px] text-danger">{reviewError}</p>}
-              <button type="submit" disabled={reviewSubmitting} className={buttonClass}>
-                {reviewSubmitting ? "Posting..." : "Post review"}
-              </button>
-            </form>
+            <div className="flex flex-col gap-6 md:flex-row md:items-start">
+              {/* Left: leave a review */}
+              <form
+                className={`${formClass} md:w-[380px] md:shrink-0`}
+                onSubmit={handleReviewSubmit}
+              >
+                <h3 className="mt-0 font-sans text-[15px]">Leave a review</h3>
+                <input
+                  placeholder="Your name"
+                  value={reviewForm.reviewerName}
+                  onChange={(e) =>
+                    setReviewForm((p) => ({
+                      ...p,
+                      reviewerName: e.target.value,
+                    }))
+                  }
+                  className={inputClass}
+                />
+                <div className="my-1 flex gap-1.5">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`cursor-pointer border-none bg-transparent p-0 text-[26px] leading-none transition hover:scale-110 ${
+                        n <= reviewForm.rating
+                          ? "text-accent-gold"
+                          : "text-[#d8d8d8]"
+                      }`}
+                      onClick={() =>
+                        setReviewForm((p) => ({ ...p, rating: n }))
+                      }
+                      aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  placeholder="Share your experience..."
+                  value={reviewForm.comment}
+                  onChange={(e) =>
+                    setReviewForm((p) => ({ ...p, comment: e.target.value }))
+                  }
+                  className={inputClass}
+                />
+                {reviewError && (
+                  <p className="-mt-1.5 text-[13px] text-danger">
+                    {reviewError}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  disabled={reviewSubmitting}
+                  className={buttonClass}
+                >
+                  {reviewSubmitting ? "Posting..." : "Post review"}
+                </button>
+              </form>
 
-            <div className="flex flex-col gap-3.5">
-              {restaurant.reviews?.length > 0 ? (
-                restaurant.reviews.map((r) => (
-                  <div key={r.id} className="rounded-[14px] bg-white px-[18px] py-4 shadow-card-sm max-[480px]:px-4">
-                    <div className="mb-1.5 flex items-start justify-between gap-3 max-[480px]:flex-col max-[480px]:gap-1">
-                      <strong className="break-words">{r.reviewerName}</strong>
-                      <span className="shrink-0 font-semibold text-accent-gold">★ {r.rating}</span>
+              <div className="flex min-w-0 flex-1 flex-col gap-3.5 md:max-h-[520px] md:overflow-y-auto md:pr-1">
+                {restaurant.reviews?.length > 0 ? (
+                  restaurant.reviews.map((r) => (
+                    <div
+                      key={r.id}
+                      className="rounded-[14px] bg-white px-[18px] py-4 shadow-card-sm max-[480px]:px-4"
+                    >
+                      <div className="mb-1.5 flex items-start justify-between gap-3 max-[480px]:flex-col max-[480px]:gap-1">
+                        <strong className="break-words">
+                          {r.reviewerName}
+                        </strong>
+                        <span className="shrink-0 font-semibold text-accent-gold">
+                          ★ {r.rating}
+                        </span>
+                      </div>
+                      <p className="m-0 break-words">{r.comment}</p>
+                      <small className="text-text-muted">
+                        {new Date(r.createdAt).toLocaleDateString()}
+                      </small>
                     </div>
-                    <p className="m-0 break-words">{r.comment}</p>
-                    <small className="text-text-muted">{new Date(r.createdAt).toLocaleDateString()}</small>
-                  </div>
-                ))
-              ) : (
-                <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">
-                  No reviews yet. Be the first to review.
-                </p>
-              )}
+                  ))
+                ) : (
+                  <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">
+                    No reviews yet. Be the first to review.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -386,8 +506,12 @@ export default function RestaurantDetails() {
             <h2 className="mt-0">Book a Table</h2>
             {bookingSuccess ? (
               <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">
-                Request sent! The restaurant will confirm your booking shortly. Track its status anytime at{" "}
-                <a href="/my-bookings" className="font-medium text-forest">My Bookings</a>.
+                Request sent! The restaurant will confirm your booking shortly.
+                Track its status anytime at{" "}
+                <a href="/my-bookings" className="font-medium text-forest">
+                  My Bookings
+                </a>
+                .
               </p>
             ) : (
               <form className={formClass} onSubmit={handleBookingSubmit}>
@@ -395,7 +519,10 @@ export default function RestaurantDetails() {
                   placeholder="Your name"
                   value={bookingForm.customerName}
                   onChange={(e) =>
-                    setBookingForm((p) => ({ ...p, customerName: e.target.value }))
+                    setBookingForm((p) => ({
+                      ...p,
+                      customerName: e.target.value,
+                    }))
                   }
                   className={inputClass}
                 />
@@ -403,14 +530,17 @@ export default function RestaurantDetails() {
                   placeholder="Phone number"
                   value={bookingForm.customerPhone}
                   onChange={(e) =>
-                    setBookingForm((p) => ({ ...p, customerPhone: e.target.value }))
+                    setBookingForm((p) => ({
+                      ...p,
+                      customerPhone: e.target.value,
+                    }))
                   }
                   className={inputClass}
                 />
                 <input
                   type="number"
                   min="1"
-                  placeholder="Party size"
+                  placeholder="Number of People"
                   value={bookingForm.partySize}
                   onChange={(e) =>
                     setBookingForm((p) => ({ ...p, partySize: e.target.value }))
@@ -421,7 +551,10 @@ export default function RestaurantDetails() {
                   type="date"
                   value={bookingForm.bookingDate}
                   onChange={(e) =>
-                    setBookingForm((p) => ({ ...p, bookingDate: e.target.value }))
+                    setBookingForm((p) => ({
+                      ...p,
+                      bookingDate: e.target.value,
+                    }))
                   }
                   className={inputClass}
                 />
@@ -430,7 +563,10 @@ export default function RestaurantDetails() {
                   type="time"
                   value={bookingForm.bookingTime}
                   onChange={(e) =>
-                    setBookingForm((p) => ({ ...p, bookingTime: e.target.value }))
+                    setBookingForm((p) => ({
+                      ...p,
+                      bookingTime: e.target.value,
+                    }))
                   }
                   className={inputClass}
                 />
@@ -442,8 +578,16 @@ export default function RestaurantDetails() {
                   }
                   className={inputClass}
                 />
-                {bookingError && <p className="-mt-1.5 text-[13px] text-danger">{bookingError}</p>}
-                <button type="submit" disabled={bookingSubmitting} className={buttonClass}>
+                {bookingError && (
+                  <p className="-mt-1.5 text-[13px] text-danger">
+                    {bookingError}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  disabled={bookingSubmitting}
+                  className={buttonClass}
+                >
                   {bookingSubmitting ? "Sending..." : "Request booking"}
                 </button>
               </form>

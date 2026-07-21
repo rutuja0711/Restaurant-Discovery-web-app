@@ -15,11 +15,20 @@ export async function GET(request) {
       location: location || undefined,
       cuisine: cuisine ? { contains: cuisine, mode: "insensitive" } : undefined,
     },
-    include: { images: true },
+    include: { images: true, reviews: { select: { rating: true } } },
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(restaurants);
+  const withComputedRating = restaurants.map((r) => {
+    const avgRating =
+      r.reviews.length > 0
+        ? r.reviews.reduce((sum, rev) => sum + rev.rating, 0) / r.reviews.length
+        : 0;
+    const { reviews, ...rest } = r;
+    return { ...rest, rating: Number(avgRating.toFixed(1)), reviewCount: reviews.length };
+  });
+
+  return NextResponse.json(withComputedRating);
 }
 
 export async function POST(request) {
@@ -39,7 +48,6 @@ export async function POST(request) {
 
   const { imageUrls, menuItems, ...restaurantData } = body;
 
-  // Auto-geocode the address into lat/lng
   const fullAddress = `${restaurantData.address}, ${restaurantData.location}`;
   const coords = await geocodeAddress(fullAddress);
   if (coords) {
