@@ -24,23 +24,27 @@ model Restaurant {
   longitude     Float?
   menuItems     MenuItem[]
   images        RestaurantImage[]
-   tables      RestaurantTable[]
+  tables        RestaurantTable[]
 
   ownerId Int?
   owner   Admin? @relation(fields: [ownerId], references: [id], onDelete: SetNull)
-  
-  reviews     Review[]
-  bookings    Booking[]
-  
+
+  reviews  Review[]
+  bookings Booking[]
 }
+
 model RestaurantTable {
   id           Int        @id @default(autoincrement())
   tableNumber  String
   capacity     Int
+  isIndoor     Boolean    @default(true)
+  isVip        Boolean    @default(false)
+  isActive     Boolean    @default(true)
   restaurantId Int
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   bookings     Booking[]
 }
+
 model RestaurantImage {
   id           Int        @id @default(autoincrement())
   imageUrl     String
@@ -77,9 +81,6 @@ model User {
   bookings     Booking[]
 }
 
-
-
-
 model Admin {
   id           Int          @id @default(autoincrement())
   name         String
@@ -90,22 +91,23 @@ model Admin {
 }
 
 model Booking {
-  id             Int        @id @default(autoincrement())
-  restaurantId   Int
-  restaurant     Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  userId         Int?
-  user           User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
-  tableId        Int
-  table          RestaurantTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
-  customerName   String
-  customerPhone  String
-  partySize      Int
-  slotStart      DateTime
-  slotEnd        DateTime
-  bookingDate    String
-  bookingTime    String
-  notes          String?
-  status         String     @default("pending") // pending, confirmed, declined
-  createdAt      DateTime   @default(now())
+  id            Int             @id @default(autoincrement())
+  restaurantId  Int
+  restaurant    Restaurant      @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  userId        Int?
+  user          User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tableId       Int
+  table         RestaurantTable @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  customerName  String
+  customerPhone String
+  partySize     Int
+  slotStart     DateTime
+  slotEnd       DateTime
+  bookingDate   String
+  bookingTime   String
+  notes         String?
+  status        String          @default("pending") // pending, confirmed, declined, cancelled, arrived, completed
+  createdAt     DateTime        @default(now())
+
   @@unique([tableId, slotStart])
 }

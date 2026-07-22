@@ -8,18 +8,34 @@ export async function GET(request) {
   const search = searchParams.get("search");
   const location = searchParams.get("location");
   const cuisine = searchParams.get("cuisine");
+  const cuisinesParam = searchParams.get("cuisines"); // comma-separated multi-select
+  const minRating = Number(searchParams.get("minRating") || 0);
+  const sortBy = searchParams.get("sortBy") || "popularity";
+  const page = Number(searchParams.get("page") || 1);
+  const limit = Number(searchParams.get("limit") || 8);
+  const noPagination = searchParams.get("all") === "true";
 
-  const restaurants = await prisma.restaurant.findMany({
-    where: {
-      name: search ? { contains: search, mode: "insensitive" } : undefined,
-      location: location || undefined,
-      cuisine: cuisine ? { contains: cuisine, mode: "insensitive" } : undefined,
-    },
+
+
+  const cuisineList = cuisinesParam ? cuisinesParam.split(",").filter(Boolean) : [];
+
+  const where = {
+    name: search ? { contains: search, mode: "insensitive" } : undefined,
+    location: location || undefined,
+    ...(cuisineList.length > 0
+      ? { OR: cuisineList.map((c) => ({ cuisine: { contains: c, mode: "insensitive" } })) }
+      : cuisine
+      ? { cuisine: { contains: cuisine, mode: "insensitive" } }
+      : {}),
+  };
+
+  const all = await prisma.restaurant.findMany({
+    where,
     include: { images: true, reviews: { select: { rating: true } } },
     orderBy: { createdAt: "desc" },
   });
 
-  const withComputedRating = restaurants.map((r) => {
+  let withComputedRating = all.map((r) => {
     const avgRating =
       r.reviews.length > 0
         ? r.reviews.reduce((sum, rev) => sum + rev.rating, 0) / r.reviews.length
@@ -28,7 +44,29 @@ export async function GET(request) {
     return { ...rest, rating: Number(avgRating.toFixed(1)), reviewCount: reviews.length };
   });
 
-  return NextResponse.json(withComputedRating);
+  if (minRating > 0) {
+    withComputedRating = withComputedRating.filter((r) => r.rating >= minRating);
+  }
+
+  if (sortBy === "rating") {
+    withComputedRating.sort((a, b) => b.rating - a.rating);
+  } else if (sortBy === "popularity") {
+    withComputedRating.sort((a, b) => b.reviewCount - a.reviewCount);
+  }
+
+  const totalCount = withComputedRating.length;
+  const totalPages = Math.ceil(totalCount / limit);
+
+  const pageItems = noPagination
+    ? withComputedRating
+    : withComputedRating.slice((page - 1) * limit, page * limit);
+
+  return NextResponse.json({
+    restaurants: pageItems,
+    totalCount,
+    totalPages,
+    currentPage: page,
+  });
 }
 
 export async function POST(request) {

@@ -39,6 +39,9 @@ export default function RestaurantDetails() {
     bookingTime: "",
     notes: "",
   });
+
+  const [expandedReviews, setExpandedReviews] = useState(new Set());
+  const [helpfulCounts, setHelpfulCounts] = useState({});
   const [bookingError, setBookingError] = useState("");
   const [bookingSubmitting, setBookingSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
@@ -57,6 +60,18 @@ export default function RestaurantDetails() {
   useEffect(() => {
     loadRestaurant();
   }, [id]);
+
+  function toggleExpanded(id) {
+    setExpandedReviews((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function markHelpful(id) {
+    setHelpfulCounts((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+  }
 
   async function handleReviewSubmit(e) {
     e.preventDefault();
@@ -109,6 +124,7 @@ export default function RestaurantDetails() {
       setBookingForm({
         customerName: "",
         customerPhone: "",
+        customerEmail: "",
         partySize: 2,
         bookingDate: "",
         bookingTime: "",
@@ -122,13 +138,41 @@ export default function RestaurantDetails() {
   async function handleBookingSubmit(e) {
     e.preventDefault();
     setBookingError("");
+
+    const phoneDigits = bookingForm.customerPhone.replace(/\D/g, "");
+
+    if (!bookingForm.customerName.trim()) {
+      setBookingError("Please enter your name.");
+      return;
+    }
+    if (phoneDigits.length !== 10) {
+      setBookingError("Please enter a valid 10-digit phone number.");
+      return;
+    }
     if (
-      !bookingForm.customerName.trim() ||
-      !bookingForm.customerPhone.trim() ||
-      !bookingForm.bookingDate ||
-      !bookingForm.bookingTime
+      bookingForm.customerEmail.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(bookingForm.customerEmail.trim())
     ) {
-      setBookingError("Please fill in all required fields.");
+      setBookingError("Please enter a valid email address.");
+      return;
+    }
+    if (!bookingForm.partySize || Number(bookingForm.partySize) < 1) {
+      setBookingError("Party size must be at least 1.");
+      return;
+    }
+    if (!bookingForm.bookingDate) {
+      setBookingError("Please select a date.");
+      return;
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const chosenDate = new Date(bookingForm.bookingDate);
+    if (chosenDate < today) {
+      setBookingError("Please select a future date.");
+      return;
+    }
+    if (!bookingForm.bookingTime) {
+      setBookingError("Please select a time.");
       return;
     }
 
@@ -141,8 +185,9 @@ export default function RestaurantDetails() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        customerName: bookingForm.customerName,
-        customerPhone: bookingForm.customerPhone,
+        customerName: bookingForm.customerName.trim(),
+        customerPhone: phoneDigits,
+        customerEmail: bookingForm.customerEmail.trim() || undefined,
         partySize: bookingForm.partySize,
         slotStart,
         notes: bookingForm.notes,
@@ -154,6 +199,7 @@ export default function RestaurantDetails() {
       setBookingForm({
         customerName: "",
         customerPhone: "",
+        customerEmail: "",
         partySize: 2,
         bookingDate: "",
         bookingTime: "",
@@ -469,28 +515,80 @@ export default function RestaurantDetails() {
                   {reviewSubmitting ? "Posting..." : "Post review"}
                 </button>
               </form>
-
               <div className="flex min-w-0 flex-1 flex-col gap-3.5 md:max-h-[520px] md:overflow-y-auto md:pr-1">
                 {restaurant.reviews?.length > 0 ? (
-                  restaurant.reviews.map((r) => (
-                    <div
-                      key={r.id}
-                      className="rounded-[14px] bg-white px-[18px] py-4 shadow-card-sm max-[480px]:px-4"
-                    >
-                      <div className="mb-1.5 flex items-start justify-between gap-3 max-[480px]:flex-col max-[480px]:gap-1">
-                        <strong className="break-words">
-                          {r.reviewerName}
-                        </strong>
-                        <span className="shrink-0 font-semibold text-accent-gold">
-                          ★ {r.rating}
-                        </span>
+                  restaurant.reviews.map((r) => {
+                    const isPositive = r.rating >= 4;
+                    const isNegative = r.rating <= 2;
+                    const isExpanded = expandedReviews.has(r.id);
+                    const truncateAt = 160;
+                    const isLong = r.comment.length > truncateAt;
+                    const displayText =
+                      isExpanded || !isLong
+                        ? r.comment
+                        : `${r.comment.slice(0, truncateAt)}...`;
+
+                    return (
+                      <div
+                        key={r.id}
+                        className="rounded-[14px] bg-white px-[18px] py-4 shadow-card-sm max-[480px]:px-4"
+                      >
+                        <div className="mb-3 flex items-start justify-between gap-3 max-[480px]:flex-col max-[480px]:gap-1.5">
+                          <div className="flex items-center gap-2">
+                            <strong className="break-words">
+                              {r.reviewerName}
+                            </strong>
+                            {(isPositive || isNegative) && (
+                              <span
+                                className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-medium ${
+                                  isPositive
+                                    ? "bg-success/10 text-success"
+                                    : "bg-danger/10 text-danger"
+                                }`}
+                              >
+                                {isPositive ? "👍" : "👎"}{" "}
+                                {isPositive ? "Positive" : "Negative"}
+                              </span>
+                            )}
+                          </div>
+                          <small className="shrink-0 text-text-muted">
+                            {new Date(r.createdAt).toLocaleDateString()}
+                          </small>
+                        </div>
+
+                        <div className="rounded-[10px] bg-[#f6f7f9] px-3.5 py-3">
+                          <p className="m-0 mb-2 flex items-center gap-1.5 text-[13px] font-medium text-black/80">
+                            {" "}
+                           
+                            {restaurant.location}
+                          </p>
+                          <p className="m-0 break-words text-[14px] leading-relaxed text-black/85">
+                            "{displayText}"
+                          </p>
+                          {isLong && (
+                            <button
+                              type="button"
+                              onClick={() => toggleExpanded(r.id)}
+                              className="mt-1.5 cursor-pointer border-none bg-transparent p-0 text-[13px] font-semibold text-success"
+                            >
+                              {isExpanded ? "Show less ▲" : "Show more ▼"}
+                            </button>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => markHelpful(r.id)}
+                          className="mt-3 flex cursor-pointer items-center gap-1.5 border-none bg-transparent p-0 text-[13px] font-medium text-text-muted hover:text-forest-dark"
+                        >
+                          👍 Helpful
+                          {helpfulCounts[r.id]
+                            ? ` (${helpfulCounts[r.id]})`
+                            : ""}
+                        </button>
                       </div>
-                      <p className="m-0 break-words">{r.comment}</p>
-                      <small className="text-text-muted">
-                        {new Date(r.createdAt).toLocaleDateString()}
-                      </small>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">
                     No reviews yet. Be the first to review.
@@ -502,10 +600,10 @@ export default function RestaurantDetails() {
         )}
 
         {activeTab === "booking" && (
-          <div>
-            <h2 className="mt-0">Book a Table</h2>
+          <div className="mx-auto w-full">
+            <h2 className="mt-0 text-center">Book a Table</h2>
             {bookingSuccess ? (
-              <p className="px-6 py-[60px] text-center text-[15px] text-text-muted">
+              <p className="mx-auto max-w-[600px] px-6 py-[60px] text-center text-[15px] text-text-muted">
                 Request sent! The restaurant will confirm your booking shortly.
                 Track its status anytime at{" "}
                 <a href="/my-bookings" className="font-medium text-forest">
@@ -514,79 +612,153 @@ export default function RestaurantDetails() {
                 .
               </p>
             ) : (
-              <form className={formClass} onSubmit={handleBookingSubmit}>
-                <input
-                  placeholder="Your name"
-                  value={bookingForm.customerName}
-                  onChange={(e) =>
-                    setBookingForm((p) => ({
-                      ...p,
-                      customerName: e.target.value,
-                    }))
-                  }
-                  className={inputClass}
-                />
-                <input
-                  placeholder="Phone number"
-                  value={bookingForm.customerPhone}
-                  onChange={(e) =>
-                    setBookingForm((p) => ({
-                      ...p,
-                      customerPhone: e.target.value,
-                    }))
-                  }
-                  className={inputClass}
-                />
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="Number of People"
-                  value={bookingForm.partySize}
-                  onChange={(e) =>
-                    setBookingForm((p) => ({ ...p, partySize: e.target.value }))
-                  }
-                  className={inputClass}
-                />
-                <input
-                  type="date"
-                  value={bookingForm.bookingDate}
-                  onChange={(e) =>
-                    setBookingForm((p) => ({
-                      ...p,
-                      bookingDate: e.target.value,
-                    }))
-                  }
-                  className={inputClass}
-                />
-                <input
-                  placeholder="Time"
-                  type="time"
-                  value={bookingForm.bookingTime}
-                  onChange={(e) =>
-                    setBookingForm((p) => ({
-                      ...p,
-                      bookingTime: e.target.value,
-                    }))
-                  }
-                  className={inputClass}
-                />
-                <textarea
-                  placeholder="Any special requests? (optional)"
-                  value={bookingForm.notes}
-                  onChange={(e) =>
-                    setBookingForm((p) => ({ ...p, notes: e.target.value }))
-                  }
-                  className={inputClass}
-                />
+              <form
+                className="mx-auto my-4 mb-8 w-full rounded-[18px] bg-glass p-[22px] shadow-card-sm backdrop-blur-[14px] max-[700px]:p-4"
+                onSubmit={handleBookingSubmit}
+                noValidate
+              >
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4 max-[700px]:grid-cols-1">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[13px] font-medium text-forest-dark">
+                      Name <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      placeholder="Your name"
+                      value={bookingForm.customerName}
+                      onChange={(e) =>
+                        setBookingForm((p) => ({
+                          ...p,
+                          customerName: e.target.value,
+                        }))
+                      }
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[13px] font-medium text-forest-dark">
+                      Phone number <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      placeholder="10-digit mobile number"
+                      value={bookingForm.customerPhone}
+                      onChange={(e) =>
+                        setBookingForm((p) => ({
+                          ...p,
+                          customerPhone: e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 10),
+                        }))
+                      }
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[13px] font-medium text-forest-dark">
+                      Email <span className="text-text-muted">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="you@example.com"
+                      value={bookingForm.customerEmail}
+                      onChange={(e) =>
+                        setBookingForm((p) => ({
+                          ...p,
+                          customerEmail: e.target.value,
+                        }))
+                      }
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[13px] font-medium text-forest-dark">
+                      Number of people <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Number of people"
+                      value={bookingForm.partySize}
+                      onChange={(e) =>
+                        setBookingForm((p) => ({
+                          ...p,
+                          partySize: e.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, 2),
+                        }))
+                      }
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[13px] font-medium text-forest-dark">
+                      Date <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={bookingForm.bookingDate}
+                      onChange={(e) =>
+                        setBookingForm((p) => ({
+                          ...p,
+                          bookingDate: e.target.value,
+                        }))
+                      }
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[13px] font-medium text-forest-dark">
+                      Time <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="time"
+                      value={bookingForm.bookingTime}
+                      onChange={(e) =>
+                        setBookingForm((p) => ({
+                          ...p,
+                          bookingTime: e.target.value,
+                        }))
+                      }
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="col-span-2 flex flex-col gap-1.5 max-[700px]:col-span-1">
+                    <label className="text-[13px] font-medium text-forest-dark">
+                      Special requests{" "}
+                      <span className="text-text-muted">(optional)</span>
+                    </label>
+                    <textarea
+                      placeholder="Any special requests? (max 200 characters)"
+                      value={bookingForm.notes}
+                      rows={3}
+                      onChange={(e) =>
+                        setBookingForm((p) => ({
+                          ...p,
+                          notes: e.target.value.slice(0, 200),
+                        }))
+                      }
+                      className={inputClass}
+                    />
+                    <p className="-mt-1 text-right text-xs text-text-muted">
+                      {bookingForm.notes.length}/200
+                    </p>
+                  </div>
+                </div>
+
                 {bookingError && (
-                  <p className="-mt-1.5 text-[13px] text-danger">
-                    {bookingError}
-                  </p>
+                  <p className="mt-2 text-[13px] text-danger">{bookingError}</p>
                 )}
                 <button
                   type="submit"
                   disabled={bookingSubmitting}
-                  className={buttonClass}
+                  className={`${buttonClass} mt-4 w-full`}
                 >
                   {bookingSubmitting ? "Sending..." : "Request booking"}
                 </button>

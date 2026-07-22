@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { verifyAdminToken } from '@/lib/auth';
 
+const VALID_STATUSES = ['pending', 'confirmed', 'declined', 'cancelled', 'arrived', 'completed'];
+
 export async function PUT(request, { params }) {
   const token = request.cookies.get('admin_session')?.value;
   const adminId = verifyAdminToken(token);
@@ -10,11 +12,14 @@ export async function PUT(request, { params }) {
   const { id } = await params;
   const { status } = await request.json();
 
-  if (!['confirmed', 'declined', 'pending'].includes(status)) {
+  if (!VALID_STATUSES.includes(status)) {
     return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
   }
 
-  const booking = await prisma.booking.findUnique({ where: { id: Number(id) }, include: { restaurant: true } });
+  const booking = await prisma.booking.findUnique({
+    where: { id: Number(id) },
+    include: { restaurant: true },
+  });
   if (!booking || booking.restaurant.ownerId !== adminId) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }

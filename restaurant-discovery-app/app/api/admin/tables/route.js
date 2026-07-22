@@ -15,7 +15,10 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  const tables = await prisma.restaurantTable.findMany({ where: { restaurantId } });
+  const tables = await prisma.restaurantTable.findMany({
+    where: { restaurantId },
+    orderBy: { tableNumber: 'asc' },
+  });
   return NextResponse.json(tables);
 }
 
@@ -24,7 +27,7 @@ export async function POST(request) {
   const adminId = verifyAdminToken(token);
   if (!adminId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { restaurantId, tableNumber, capacity } = await request.json();
+  const { restaurantId, tableNumber, capacity, isIndoor, isVip, isActive } = await request.json();
 
   const restaurant = await prisma.restaurant.findUnique({ where: { id: Number(restaurantId) } });
   if (!restaurant || restaurant.ownerId !== adminId) {
@@ -36,7 +39,14 @@ export async function POST(request) {
   }
 
   const table = await prisma.restaurantTable.create({
-    data: { restaurantId: Number(restaurantId), tableNumber: tableNumber.trim(), capacity: Number(capacity) },
+    data: {
+      restaurantId: Number(restaurantId),
+      tableNumber: tableNumber.trim(),
+      capacity: Number(capacity),
+      isIndoor: isIndoor ?? true,
+      isVip: isVip ?? false,
+      isActive: isActive ?? true,
+    },
   });
   return NextResponse.json(table, { status: 201 });
 }
