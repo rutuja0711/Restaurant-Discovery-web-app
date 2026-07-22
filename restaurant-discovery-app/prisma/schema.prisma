@@ -9,19 +9,23 @@ datasource db {
 }
 
 model Restaurant {
-  id            Int               @id @default(autoincrement())
-  name          String
-  cuisine       String
-  location      String
-  address       String?
-  priceRange    String?
-  rating        Float             @default(0)
-  description   String?
-  openingHours  String?
-  contactNumber String?
-  createdAt     DateTime          @default(now())
-  latitude      Float?
-  longitude     Float?
+  id               Int               @id @default(autoincrement())
+  name             String
+  cuisine          String
+  location         String
+  address          String?
+  priceRange       String?
+  rating           Float             @default(0)
+  description      String?
+  openingHours     String?
+  contactNumber    String?
+  isOpen           Boolean           @default(true)
+  slotDuration     Int               @default(45)
+  maxGuestsPerSlot Int               @default(20)
+  blockedDates     String?
+  createdAt        DateTime          @default(now())
+  latitude         Float?
+  longitude        Float?
   menuItems     MenuItem[]
   images        RestaurantImage[]
   tables        RestaurantTable[]
